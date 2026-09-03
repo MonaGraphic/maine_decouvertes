@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset name="mona-faq">
+    <description>WordPress coding standards for Mona FAQ</description>
+
+    <arg name="extensions" value="php"/>
+    <arg value="s"/>
+
+    <file>./mona-faq.php</file>
+    <file>./src</file>
+    <file>./blocks/faq/render.php</file>
+
+    <rule ref="WordPress-Core"/>
+    <rule ref="WordPress-Extra"/>
+    <rule ref="WordPress-Docs"/>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="mona-faq"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>

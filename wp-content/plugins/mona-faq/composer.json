@@ -1,0 +1,33 @@
+{
+  "name": "monagraphic/mona-faq",
+  "description": "Plugin FAQ autonome pour WordPress.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "version": "0.1.0",
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=8.3"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.13",
+    "wp-coding-standards/wpcs": "^3.4",
+    "phpstan/phpstan": "^2.2",
+    "phpstan/extension-installer": "^1.4",
+    "szepeviktor/phpstan-wordpress": "^2.0"
+  },
+  "scripts": {
+    "cs": "php -d memory_limit=512M vendor/bin/phpcs --standard=phpcs.xml.dist",
+    "analyse": "phpstan analyse -c phpstan.neon.dist --memory-limit=1G"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
+    }
+  }
+}

@@ -1,0 +1,13 @@
+.wp-block[data-type="mona-faq/faq"] .faq {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.wp-block[data-type="mona-faq/faq"] .faq__item {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
