@@ -1,0 +1,611 @@
+{
+  "key": "group_page_builder",
+  "title": "Page Builder",
+  "fields": [
+    {
+      "key": "field_page_builder",
+      "label": "Page Builder",
+      "name": "page_builder",
+      "aria-label": "",
+      "type": "flexible_content",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "layouts": {
+        "layout_texte": {
+          "key": "layout_texte",
+          "name": "texte",
+          "label": "Texte",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_texte",
+              "label": "Texte",
+              "name": "texte",
+              "aria-label": "",
+              "type": "wysiwyg",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "default_value": "",
+              "tabs": "all",
+              "toolbar": "page_builder",
+              "media_upload": 0,
+              "delay": 0,
+              "wpautop": 1,
+              "allow_in_bindings": 0
+            }
+          ]
+        },
+        "layout_texte_image": {
+          "key": "layout_texte_image",
+          "name": "texte_image",
+          "label": "Texte + image",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_ti_texte",
+              "label": "Texte",
+              "name": "texte",
+              "aria-label": "",
+              "type": "wysiwyg",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "default_value": "",
+              "tabs": "all",
+              "toolbar": "page_builder",
+              "media_upload": 0,
+              "delay": 0,
+              "wpautop": 1,
+              "allow_in_bindings": 0
+            },
+            {
+              "key": "field_pb_ti_image",
+              "label": "Image",
+              "name": "image",
+              "aria-label": "",
+              "type": "image",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "33.33",
+                "class": "",
+                "id": ""
+              },
+              "return_format": "id",
+              "library": "all",
+              "min_width": "",
+              "min_height": "",
+              "min_size": "",
+              "max_width": "",
+              "max_height": "",
+              "max_size": "",
+              "mime_types": "",
+              "allow_in_bindings": 0,
+              "preview_size": "medium"
+            },
+            {
+              "key": "field_pb_ti_position",
+              "label": "Position de l'image",
+              "name": "position_image",
+              "aria-label": "",
+              "type": "button_group",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "33.33",
+                "class": "",
+                "id": ""
+              },
+              "choices": {
+                "left": "Gauche",
+                "right": "Droite"
+              },
+              "default_value": "right",
+              "return_format": "value",
+              "allow_null": 0,
+              "layout": "horizontal",
+              "allow_in_bindings": 0
+            },
+            {
+              "key": "field_page_builder_texte_image_legende",
+              "label": "Légende",
+              "name": "legende",
+              "aria-label": "",
+              "type": "text",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "33.33",
+                "class": "",
+                "id": ""
+              },
+              "default_value": "",
+              "maxlength": "",
+              "placeholder": "",
+              "prepend": "",
+              "append": ""
+            }
+          ]
+        },
+        "layout_image": {
+          "key": "layout_image",
+          "name": "image",
+          "label": "Image",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_image",
+              "label": "Image",
+              "name": "image",
+              "aria-label": "",
+              "type": "image",
+              "instructions": "",
+              "required": 1,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "return_format": "id",
+              "library": "all",
+              "min_width": "",
+              "min_height": "",
+              "min_size": "",
+              "max_width": "",
+              "max_height": "",
+              "max_size": "",
+              "mime_types": "",
+              "allow_in_bindings": 0,
+              "preview_size": "medium"
+            },
+            {
+              "key": "field_pb_legende",
+              "label": "Légende",
+              "name": "legende",
+              "aria-label": "",
+              "type": "text",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "default_value": "",
+              "maxlength": "",
+              "allow_in_bindings": 0,
+              "placeholder": "",
+              "prepend": "",
+              "append": ""
+            }
+          ]
+        },
+        "layout_bouton": {
+          "key": "layout_bouton",
+          "name": "bouton",
+          "label": "Bouton",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_lien",
+              "label": "Lien",
+              "name": "lien",
+              "aria-label": "",
+              "type": "link",
+              "instructions": "",
+              "required": 1,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "return_format": "array",
+              "allow_in_bindings": 0
+            }
+          ]
+        },
+        "layout_galerie": {
+          "key": "layout_galerie",
+          "name": "galerie",
+          "label": "Galerie",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_galerie",
+              "label": "Images",
+              "name": "images",
+              "aria-label": "",
+              "type": "gallery",
+              "instructions": "",
+              "required": 1,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "return_format": "id",
+              "library": "all",
+              "min_width": "",
+              "min_height": "",
+              "min_size": "",
+              "max_width": "",
+              "max_height": "",
+              "max_size": "",
+              "mime_types": "",
+              "insert": "append",
+              "preview_size": "medium",
+              "allowed_types": "",
+              "min": 1,
+              "max": "",
+              "minimum_attachment": "",
+              "maximum_attachment": "",
+              "insert_placement": "bottom",
+              "use_ajax": 0,
+              "allow_in_bindings": 0
+            }
+          ]
+        },
+        "layout_organigramme": {
+          "key": "layout_organigramme",
+          "name": "organigramme",
+          "label": "Organigramme",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_organigramme",
+              "label": "Organigramme",
+              "name": "organigramme",
+              "aria-label": "",
+              "type": "repeater",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "layout": "block",
+              "pagination": 0,
+              "min": 0,
+              "max": 0,
+              "collapsed": "",
+              "button": "Ajouter une personne",
+              "rows_per_page": 20,
+              "sub_fields": [
+                {
+                  "key": "field_pb_org_nom",
+                  "label": "Nom",
+                  "name": "nom",
+                  "aria-label": "",
+                  "type": "text",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "maxlength": "",
+                  "allow_in_bindings": 0
+                },
+                {
+                  "key": "field_pb_org_prenom",
+                  "label": "Prénom",
+                  "name": "prenom",
+                  "aria-label": "",
+                  "type": "text",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "maxlength": "",
+                  "allow_in_bindings": 0
+                },
+                {
+                  "key": "field_pb_org_photo",
+                  "label": "Photo",
+                  "name": "photo",
+                  "aria-label": "",
+                  "type": "image",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "return_format": "id",
+                  "library": "all",
+                  "preview_size": "medium",
+                  "allow_in_bindings": 0
+                },
+                {
+                  "key": "field_pb_org_description",
+                  "label": "Description",
+                  "name": "description",
+                  "aria-label": "",
+                  "type": "wysiwyg",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "tabs": "all",
+                  "toolbar": "page_builder",
+                  "media_upload": 0,
+                  "delay": 0,
+                  "wpautop": 1,
+                  "allow_in_bindings": 0
+                }
+              ]
+            }
+          ]
+        },
+        "layout_accordeon": {
+          "key": "layout_accordeon",
+          "name": "accordeon",
+          "label": "Accordéon",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_accordeon",
+              "label": "Accordéon",
+              "name": "accordeon",
+              "aria-label": "",
+              "type": "repeater",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "layout": "block",
+              "pagination": 0,
+              "min": 0,
+              "max": 0,
+              "collapsed": "",
+              "button": "Ajouter une question",
+              "rows_per_page": 20,
+              "sub_fields": [
+                {
+                  "key": "field_pb_acc_titre",
+                  "label": "Titre",
+                  "name": "titre",
+                  "aria-label": "",
+                  "type": "text",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "maxlength": "",
+                  "allow_in_bindings": 0,
+                  "placeholder": "",
+                  "prepend": "",
+                  "append": ""
+                },
+                {
+                  "key": "field_pb_acc_contenu",
+                  "label": "Contenu",
+                  "name": "contenu",
+                  "aria-label": "",
+                  "type": "wysiwyg",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "tabs": "all",
+                  "toolbar": "page_builder",
+                  "media_upload": 0,
+                  "delay": 0,
+                  "wpautop": 1,
+                  "allow_in_bindings": 0
+                }
+              ]
+            }
+          ]
+        },
+        "layout_onglets": {
+          "key": "layout_onglets",
+          "name": "onglets",
+          "label": "Onglets",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_onglets",
+              "label": "Onglets",
+              "name": "onglets",
+              "aria-label": "",
+              "type": "repeater",
+              "instructions": "",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "layout": "block",
+              "pagination": 0,
+              "min": 0,
+              "max": 0,
+              "collapsed": "",
+              "button": "Ajouter un onglet",
+              "rows_per_page": 20,
+              "sub_fields": [
+                {
+                  "key": "field_pb_ong_titre",
+                  "label": "Titre",
+                  "name": "titre",
+                  "aria-label": "",
+                  "type": "text",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "maxlength": "",
+                  "allow_in_bindings": 0,
+                  "placeholder": "",
+                  "prepend": "",
+                  "append": ""
+                },
+                {
+                  "key": "field_pb_ong_contenu",
+                  "label": "Contenu",
+                  "name": "contenu",
+                  "aria-label": "",
+                  "type": "wysiwyg",
+                  "instructions": "",
+                  "required": 0,
+                  "conditional_logic": 0,
+                  "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                  },
+                  "default_value": "",
+                  "tabs": "all",
+                  "toolbar": "page_builder",
+                  "media_upload": 0,
+                  "delay": 0,
+                  "wpautop": 1,
+                  "allow_in_bindings": 0
+                }
+              ]
+            }
+          ]
+        },
+        "layout_faq_mona": {
+          "key": "layout_faq_mona",
+          "name": "faq_mona",
+          "label": "FAQ",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_faqs",
+              "label": "Questions",
+              "name": "faqs",
+              "aria-label": "",
+              "type": "relationship",
+              "instructions": "Sélectionnez les questions à afficher.",
+              "required": 0,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "post_type": [
+                "faq"
+              ],
+              "post_status": [
+                "publish"
+              ],
+              "taxonomy": "",
+              "filters": [
+                "search"
+              ],
+              "return_format": "object",
+              "min": 0,
+              "max": 0,
+              "elements": "",
+              "bidirectional": 0,
+              "bidirectional_target": [],
+              "allow_in_bindings": 0
+            }
+          ]
+        }
+      },
+      "button_label": "Ajouter un bloc",
+      "min": 0,
+      "max": "",
+      "allow_in_bindings": 0
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "page"
+      }
+    ],
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "testimonial"
+      }
+    ],
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "contributeur"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "",
+  "show_in_rest": 0,
+  "modified": 1788533063
+}

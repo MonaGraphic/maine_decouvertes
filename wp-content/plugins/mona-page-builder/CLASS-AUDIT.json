@@ -1,0 +1,60 @@
+{
+  "version": "2.1.2",
+  "templates": {
+    "accordeon": [
+      "page-builder__accordion",
+      "page-builder__accordion-answer",
+      "page-builder__accordion-button",
+      "page-builder__accordion-icon",
+      "page-builder__accordion-item",
+      "page-builder__accordion-list",
+      "page-builder__accordion-question",
+      "page-builder__accordion-title"
+    ],
+    "bouton": [
+      "page-builder__button",
+      "page-builder__button-icon"
+    ],
+    "citation": [
+      "page-builder__quote"
+    ],
+    "galerie": [
+      "page-builder__gallery",
+      "page-builder__gallery-item"
+    ],
+    "image": [
+      "page-builder__image",
+      "page-builder__image-caption"
+    ],
+    "onglets": [
+      "page-builder__tabs",
+      "page-builder__tabs-list",
+      "page-builder__tabs-panel",
+      "page-builder__tabs-tab"
+    ],
+    "organigramme": [
+      "pagebuilder__organigramme",
+      "pagebuilder__organigramme__card",
+      "pagebuilder__organigramme__content",
+      "pagebuilder__organigramme__description",
+      "pagebuilder__organigramme__grid",
+      "pagebuilder__organigramme__image",
+      "pagebuilder__organigramme__name"
+    ],
+    "temoignage": [
+      "page-builder__testimonial",
+      "page-builder__testimonial-content",
+      "page-builder__testimonial-media"
+    ],
+    "texte": [
+      "page-builder__text"
+    ],
+    "texte_image": [
+      "<?php echo esc_attr( $classes ); ?>",
+      "page-builder__text-image-content",
+      "page-builder__text-image-media"
+    ]
+  },
+  "css_file": "assets/css/page-builder.css",
+  "updater": false
+}

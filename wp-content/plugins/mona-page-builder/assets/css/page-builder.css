@@ -1,0 +1,453 @@
+/*
+ * Mona Page Builder
+ *
+ * Neutral functional styles only.
+ * The active theme owns typography, colors, spacing and visual identity.
+ */
+
+.page-builder {
+	display: flex;
+	flex-direction: column;
+}
+
+.page-builder__text {
+	width: 100%;
+
+	margin-block: 1rem;
+}
+
+/* Texte + image : 4,5 colonnes / 1 colonne de séparation / 4,5 colonnes. */
+.page-builder__text-image {
+	display: grid;
+	grid-template-columns: minmax(0, 4.5fr) minmax(0, 1fr) minmax(0, 4.5fr);
+	column-gap: 0;
+	align-items: center;
+
+	margin-block: 1rem;
+}
+
+.page-builder__text-image-content {
+	grid-column: 1;
+	min-width: 0;
+}
+
+.page-builder__text-image-media {
+	grid-column: 3;
+	margin: 0;
+	min-width: 0;
+}
+
+.page-builder__text-image--left .page-builder__text-image-content {
+	grid-column: 3;
+}
+
+.page-builder__text-image--left .page-builder__text-image-media {
+	grid-column: 1;
+}
+
+.page-builder__text-image-image,
+.page-builder__image-img,
+.page-builder__testimonial-image {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.page-builder__image {
+	margin: 2rem 0;
+
+	margin-block: 1rem;
+}
+
+.page-builder__button {
+	display: flex;
+
+	margin-block: 1rem;
+}
+
+
+
+.page-builder__testimonial {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 2rem;
+	align-items: center;
+
+	margin-block: 1rem;
+}
+
+.page-builder__testimonial-media {
+	min-width: 0;
+}
+
+.page-builder__gallery {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem;
+
+	margin-block: 1rem;
+}
+
+.page-builder__gallery-item {
+	margin: 0;
+	min-width: 0;
+}
+
+.page-builder__gallery-trigger {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.page-builder__gallery-media {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	aspect-ratio: 1 / 1;
+}
+
+.page-builder__gallery-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.page-builder__gallery-overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgb(0 0 0 / 45%);
+	color: #fff;
+	opacity: 0;
+	transition: opacity 0.25s ease;
+}
+
+.page-builder__gallery-trigger:hover .page-builder__gallery-overlay,
+.page-builder__gallery-trigger:focus-visible .page-builder__gallery-overlay {
+	opacity: 1;
+}
+
+.page-builder__gallery-trigger:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+/*
+|--------------------------------------------------------------------------
+| FAQ / ACCORDÉON
+|--------------------------------------------------------------------------
+*/
+
+.page-builder__accordion-list {
+	border-top: 1px solid currentColor;
+}
+
+.page-builder__accordion-item {
+	border-bottom: 1px solid currentColor;
+}
+
+.page-builder__accordion-question {
+	margin: 0;
+}
+
+.page-builder__accordion-button {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	padding: 1.25rem 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.page-builder__accordion-title {
+	padding-right: 2rem;
+}
+
+.page-builder__accordion-icon {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	line-height: 1;
+}
+
+.page-builder__accordion-answer {
+	padding: 0 0 1.25rem;
+}
+
+.page-builder__accordion-answer[hidden],
+.page-builder__tabs-panel[hidden] {
+	display: none;
+}
+
+/*
+|--------------------------------------------------------------------------
+| ONGLETS
+|--------------------------------------------------------------------------
+*/
+
+.page-builder__tabs-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.page-builder__tabs-tab {
+	padding: 0.75rem 1rem;
+	border: 1px solid currentColor;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.page-builder__tabs-tab.active {
+	font-weight: 700;
+}
+
+.page-builder__tabs-panel {
+	padding: 1.5rem;
+	border: 1px solid #000;
+}
+
+/*
+|--------------------------------------------------------------------------
+| ORGANIGRAMME
+|--------------------------------------------------------------------------
+*/
+
+.pagebuilder__organigramme__grid {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: 2.5rem 1.5rem;
+}
+
+.pagebuilder__organigramme__card {
+	grid-column: span 3;
+	min-width: 0;
+}
+
+.pagebuilder__organigramme__image {
+	overflow: hidden;
+	aspect-ratio: 1;
+}
+
+.pagebuilder__organigramme__photo {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+@media (max-width: 900px) {
+	.page-builder__text-image,
+	.page-builder__testimonial {
+		grid-template-columns: 1fr;
+		margin-block: 1rem;
+	}
+
+	.page-builder__text-image-content,
+	.page-builder__text-image--left .page-builder__text-image-content,
+	.page-builder__text-image-media,
+	.page-builder__text-image--left .page-builder__text-image-media {
+		grid-column: 1;
+	}
+
+	.page-builder__gallery {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	
+	margin-block: 1rem;
+}
+
+	.pagebuilder__organigramme__card {
+		grid-column: span 6;
+	}
+}
+
+@media (max-width: 600px) {
+	.page-builder__gallery {
+		grid-template-columns: 1fr;
+	
+	margin-block: 1rem;
+}
+
+	.pagebuilder__organigramme__card {
+		grid-column: span 12;
+	}
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| GALLERY LIGHTBOX
+|--------------------------------------------------------------------------
+*/
+
+.page-builder__gallery-trigger {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.page-builder__gallery-trigger:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+.page-builder__gallery-caption {
+	margin-top: 0.5rem;
+}
+
+.page-builder__lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	background: rgb(0 0 0 / 85%);
+}
+
+.page-builder__lightbox[hidden] {
+	display: none;
+}
+
+.page-builder__lightbox-dialog {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.page-builder__lightbox-figure {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	max-width: calc(100vw - 10rem);
+	max-height: calc(100vh - 4rem);
+	margin: 0;
+}
+
+.page-builder__lightbox-image {
+	display: block;
+	max-width: 100%;
+	max-height: calc(100vh - 7rem);
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.page-builder__lightbox-caption {
+	max-width: 60rem;
+	margin-top: 1rem;
+	color: #fff;
+	text-align: center;
+}
+
+.page-builder__lightbox-close,
+.page-builder__lightbox-prev,
+.page-builder__lightbox-next {
+	position: absolute;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 3rem;
+	height: 3rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #fff;
+	font: inherit;
+	cursor: pointer;
+}
+
+.page-builder__lightbox-close {
+	top: 0;
+	right: 0;
+	font-size: 2.5rem;
+	line-height: 1;
+}
+
+.page-builder__lightbox-prev {
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	font-size: 3rem;
+	line-height: 1;
+}
+
+.page-builder__lightbox-next {
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	font-size: 3rem;
+	line-height: 1;
+}
+
+.page-builder__lightbox-close:focus-visible,
+.page-builder__lightbox-prev:focus-visible,
+.page-builder__lightbox-next:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 3px;
+}
+
+html.page-builder-lightbox-open {
+	overflow: hidden;
+}
+
+@media (max-width: 600px) {
+	.page-builder__lightbox {
+		padding: 1rem;
+	}
+
+	.page-builder__lightbox-figure {
+		max-width: calc(100vw - 4rem);
+		max-height: calc(100vh - 3rem);
+	}
+
+	.page-builder__lightbox-image {
+		max-height: calc(100vh - 6rem);
+	}
+
+	.page-builder__lightbox-prev,
+	.page-builder__lightbox-next {
+		width: 2.5rem;
+		height: 2.5rem;
+	}
+
+	.page-builder__lightbox-prev {
+		left: -0.25rem;
+	}
+
+	.page-builder__lightbox-next {
+		right: -0.25rem;
+	}
+}
+
+.pagebuilder__organigramme {
+	margin-block: 1rem;
+}
+
