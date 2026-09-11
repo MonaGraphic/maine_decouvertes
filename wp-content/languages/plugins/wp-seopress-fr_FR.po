@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - SEOPress &#8211; AI SEO Plugin &amp; On-site SEO - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-09-04 08:28:03+0000\n"
+"PO-Revision-Date: 2026-09-07 13:21:19+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -10,6 +10,19 @@ msgstr ""
 "X-Generator: GlotPress/4.1.0\n"
 "Language: fr\n"
 "Project-Id-Version: Plugins - SEOPress &#8211; AI SEO Plugin &amp; On-site SEO - Stable (latest release)\n"
+
+#: src/Services/I18nUniversalMetabox.php:59
+msgid "Closed all the day?"
+msgstr "Fermé toute la journée ?"
+
+#: src/Services/I18nUniversalMetabox.php:65
+msgid "Opening hour"
+msgstr "Horaires d‘ouverture"
+
+#: src/Services/Settings/ExportSettings.php:128
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "License key"
+msgstr "Clé de licence"
 
 #: public/editor/blocks/preferred-source/block.json
 msgctxt "block keyword"
