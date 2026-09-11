@@ -159,7 +159,7 @@ class FrmProEddController extends FrmAddon {
 		<p><?php echo esc_html( FrmProEddHelper::get_license_type_info( $license_type ) ); ?></p>
 		<?php if ( 'Elite' !== $license_type ) { ?>
 		<p style="font-size:1.1em">
-			To <b>unlock more features</b> consider <a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url( FrmAppHelper::admin_upgrade_link( 'settings-upgrade', 'account/downloads/' ) ) ); ?>">upgrading to the Elite plan</a>.
+			To <b>unlock more features</b> consider <a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url( FrmAppHelper::admin_upgrade_link( 'settings-upgrade', 'account/downloads/' ) ) ); ?>" target="_blank" rel="noopener">upgrading to the Elite plan</a>.
 		</p>
 		<?php } ?>
 	</div>

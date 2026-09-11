@@ -268,25 +268,130 @@ class FrmProField {
 	}
 
 	/**
-	 * Switches quantity field's product fields to the new field IDs.
+	 * The field settings that store the id of another field, and the shape each one is stored in.
 	 *
-	 * @since 6.19
+	 * A setting listed here is switched to the new field id whenever a field is duplicated or
+	 * imported, including when the field it points at is created afterwards. Settings that store a
+	 * field id inside shortcode text, such as calc and default_value, do not belong here. Those are
+	 * already handled for any order by FrmForm::switch_field_ids_in_fields().
 	 *
-	 * @param array $values
+	 * Shapes:
+	 *   int   - a single field id.
+	 *   int[] - an array of field ids. Keys are preserved, so paired arrays stay aligned.
+	 *   csv   - a comma separated string of field ids.
 	 *
-	 * @return void
+	 * @since 6.35
+	 *
+	 * @param string $field_type Field type the settings are read for. Some settings only hold a
+	 *                           field id for certain field types.
+	 *
+	 * @return array<string,string> Setting name => value shape.
 	 */
-	private static function switch_quantity_product_field_ids( &$values ) {
-		if ( $values['type'] !== 'quantity' || empty( $values['field_options']['product_field'] ) ) {
-			return;
-		}
-		global $frm_duplicate_ids;
+	public static function field_id_settings( $field_type = '' ) {
+		$settings = array(
+			'hide_field'        => 'int[]',
+			'watch_lookup'      => 'int[]',
+			'product_field'     => 'int[]',
+			'exclude_fields'    => 'csv',
+			'get_values_field'  => 'int',
+			'linked_date_field' => 'int',
+			'in_section'        => 'int',
+		);
 
-		foreach ( $values['field_options']['product_field'] as $index => $field_id ) {
-			if ( ! empty( $frm_duplicate_ids[ $field_id ] ) ) {
-				$values['field_options']['product_field'][ $index ] = (string) $frm_duplicate_ids[ $field_id ];
-			}
+		if ( 'data' === $field_type ) {
+			// form_select holds a field id on a Dynamic field. On an embedded form and on a
+			// repeating section it holds a form id, which
+			// FrmProXMLHelper::switch_form_ids_after_import() switches instead.
+			$settings['form_select'] = 'int';
 		}
+
+		/**
+		 * Filter the field settings that store the id of another field.
+		 *
+		 * Add-ons use this to have their own settings switched to the new field ids on import and
+		 * on form duplication, including when the field they point at is created afterwards.
+		 *
+		 * @since 6.35
+		 *
+		 * @param array<string,string> $settings   Setting name => value shape, one of int, int[] or csv.
+		 * @param string               $field_type Field type the settings are read for.
+		 */
+		return apply_filters( 'frm_field_id_settings', $settings, $field_type );
+	}
+
+	/**
+	 * Switch the field ids stored in a single setting value to their new ids.
+	 *
+	 * An id with no entry in the map is left alone rather than dropped, so paired arrays such as
+	 * hide_field and hide_field_cond keep the same keys.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array|int|string $value   Original setting value.
+	 * @param string           $shape   Value shape, one of int, int[] or csv.
+	 * @param array            $id_map  Map of original field ids to their new ids.
+	 * @param bool             $changed Set to true when at least one id was switched.
+	 *
+	 * @return array|int|string The switched value.
+	 */
+	public static function switch_ids_in_setting_value( $value, $shape, $id_map, &$changed ) {
+		if ( 'csv' === $shape ) {
+			$old_ids = self::split_csv_ids( $value );
+			$new_ids = array();
+
+			foreach ( $old_ids as $old_id ) {
+				$new_ids[] = self::switch_single_field_id( $old_id, $id_map, $changed );
+			}
+
+			return implode( ',', $new_ids );
+		}
+
+		if ( 'int[]' === $shape ) {
+			$new_ids = array();
+
+			foreach ( (array) $value as $key => $old_id ) {
+				$new_ids[ $key ] = self::switch_single_field_id( $old_id, $id_map, $changed );
+			}
+
+			return $new_ids;
+		}
+
+		return self::switch_single_field_id( $value, $id_map, $changed );
+	}
+
+	/**
+	 * Split a csv setting value into the field ids it holds.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array|int|string $value A comma separated list of field ids.
+	 *
+	 * @return array<string>
+	 */
+	private static function split_csv_ids( $value ) {
+		$ids = is_array( $value ) ? $value : explode( ',', (string) $value );
+		return array_filter( array_map( 'trim', array_map( 'strval', $ids ) ), 'strlen' );
+	}
+
+	/**
+	 * @since 6.35
+	 *
+	 * @param int|string $old_id  Original field id.
+	 * @param array      $id_map  Map of original field ids to their new ids.
+	 * @param bool       $changed Set to true when the id was switched.
+	 *
+	 * @return int|string The new field id, or the original when it is not in the map.
+	 */
+	private static function switch_single_field_id( $old_id, $id_map, &$changed ) {
+		if ( empty( $id_map[ $old_id ] ) ) {
+			return $old_id;
+		}
+
+		$changed = true;
+		$new_id  = $id_map[ $old_id ];
+
+		// Keep the original value type so the serialized field options keep their shape.
+		return is_string( $old_id ) ? (string) $new_id : $new_id;
 	}
 
 	/**
@@ -360,44 +465,134 @@ class FrmProField {
 			unset( $this_val, $matches );
 		}
 
-		// Switch out field ids in conditional logic
-		if ( ! empty( $values['field_options']['hide_field'] ) ) {
-			foreach ( array( 'hide_field_cond', 'hide_opt', 'hide_field' ) as $logic ) {
-				if ( isset( $values['field_options'][ $logic ] ) ) {
-					FrmAppHelper::unserialize_or_decode( $values['field_options'][ $logic ] );
-				} else {
-					$values['field_options'][ $logic ] = array();
-				}
-			}
-
-			$processed = false;
-
-			foreach ( $values['field_options']['hide_field'] as $k => $f ) {
-				if ( $is_second_run && in_array( $f, $frm_duplicate_ids ) ) {
-					// The field id may have already been replaced.
-					continue;
-				}
-
-				if ( isset( $frm_duplicate_ids[ $f ] ) ) {
-					$processed                                   = true;
-					$values['field_options']['hide_field'][ $k ] = $frm_duplicate_ids[ $f ];
-				}
-				unset( $k, $f );
-			}
-
-			if ( ! $processed && ! $is_second_run ) {
-				self::mark_field_key_as_unprocessed( $values['field_key'] );
-			}
-
-			unset( $processed );
-		}
-
-		self::switch_out_form_select( $frm_duplicate_ids, $values );
-		self::switch_id_for_section_tracking_field_option( $frm_duplicate_ids, $values );
-		self::switch_ids_for_lookup_settings( $frm_duplicate_ids, $values );
-		self::switch_quantity_product_field_ids( $values );
+		self::unserialize_conditional_logic_options( $values );
+		self::switch_ids_in_field_id_settings( $frm_duplicate_ids, $values, $is_second_run );
 
 		return $values;
+	}
+
+	/**
+	 * Conditional logic is stored across three arrays that share their keys, and any of them may
+	 * still be serialized. Unserialize them together so they stay aligned.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $values Field values, passed by reference.
+	 *
+	 * @return void
+	 */
+	private static function unserialize_conditional_logic_options( &$values ) {
+		if ( empty( $values['field_options']['hide_field'] ) ) {
+			return;
+		}
+
+		foreach ( array( 'hide_field_cond', 'hide_opt', 'hide_field' ) as $logic ) {
+			if ( isset( $values['field_options'][ $logic ] ) ) {
+				FrmAppHelper::unserialize_or_decode( $values['field_options'][ $logic ] );
+			} else {
+				$values['field_options'][ $logic ] = array();
+			}
+		}
+	}
+
+	/**
+	 * Switch every setting that stores another field's id to the new field ids.
+	 *
+	 * A setting that points at a field created later cannot be switched yet, so the field key is
+	 * marked for the second pass in FrmProDuplicateFieldsHelper::maybe_fix_field_ids_after_duplicate().
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $frm_duplicate_ids Map of original field ids to their new ids.
+	 * @param array $values            Field values, passed by reference.
+	 * @param bool  $is_second_run     True on the second pass.
+	 *
+	 * @return void
+	 */
+	private static function switch_ids_in_field_id_settings( $frm_duplicate_ids, &$values, $is_second_run ) {
+		if ( ! isset( $values['field_options']['in_section'] ) ) {
+			// Every field tracks the section it sits in, even when it sits in none.
+			$values['field_options']['in_section'] = 0;
+		}
+
+		if ( $is_second_run ) {
+			$frm_duplicate_ids = self::drop_already_switched_ids( $frm_duplicate_ids );
+		}
+
+		$field_type        = $values['type'] ?? '';
+		$has_unresolved_id = false;
+
+		foreach ( self::field_id_settings( $field_type ) as $setting => $shape ) {
+			if ( empty( $values['field_options'][ $setting ] ) ) {
+				continue;
+			}
+
+			$old_value = $values['field_options'][ $setting ];
+			$changed   = false;
+
+			$values['field_options'][ $setting ] = self::switch_ids_in_setting_value( $old_value, $shape, $frm_duplicate_ids, $changed );
+
+			if ( self::setting_has_unresolved_id( $old_value, $shape, $frm_duplicate_ids ) ) {
+				$has_unresolved_id = true;
+			}
+		}
+
+		if ( $has_unresolved_id && ! $is_second_run ) {
+			self::mark_field_key_as_unprocessed( $values['field_key'] );
+		}
+	}
+
+	/**
+	 * Check whether a setting still points at a field that has not been created yet.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array|int|string $value             Original setting value.
+	 * @param string           $shape             Value shape, one of int, int[] or csv.
+	 * @param array            $frm_duplicate_ids Map of original field ids to their new ids.
+	 *
+	 * @return bool
+	 */
+	private static function setting_has_unresolved_id( $value, $shape, $frm_duplicate_ids ) {
+		if ( 'csv' === $shape ) {
+			$old_ids = self::split_csv_ids( $value );
+		} elseif ( 'int[]' === $shape ) {
+			$old_ids = (array) $value;
+		} else {
+			$old_ids = array( $value );
+		}
+
+		foreach ( $old_ids as $old_id ) {
+			if ( $old_id && empty( $frm_duplicate_ids[ $old_id ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Drop any map entry whose original id is also one of the new ids.
+	 *
+	 * On the second pass a stored id may already have been switched. Without this an id that was
+	 * switched to a value that happens to match another field's original id would be switched twice.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $frm_duplicate_ids Map of original field ids to their new ids.
+	 *
+	 * @return array
+	 */
+	private static function drop_already_switched_ids( $frm_duplicate_ids ) {
+		$new_ids = array_flip( $frm_duplicate_ids );
+
+		foreach ( $frm_duplicate_ids as $old_id => $new_id ) {
+			if ( isset( $new_ids[ $old_id ] ) ) {
+				unset( $frm_duplicate_ids[ $old_id ] );
+			}
+		}
+
+		return $frm_duplicate_ids;
 	}
 
 	/**
@@ -413,114 +608,6 @@ class FrmProField {
 		}
 
 		$frm_unprocessed_duplicate_field_keys[] = $field_key;
-	}
-
-	/**
-	 * Switch out field ids if selected in a Dynamic Field
-	 *
-	 * @since 2.0.25
-	 *
-	 * @param array $frm_duplicate_ids
-	 * @param array $values
-	 */
-	private static function switch_out_form_select( $frm_duplicate_ids, &$values ) {
-		if ( 'data' === $values['type'] && FrmField::is_option_true_in_array( $values['field_options'], 'form_select' ) ) {
-			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'form_select', $values['field_options'] );
-		}
-	}
-
-	/**
-	 * Switch the in_section ID when a field is duplicated
-	 *
-	 * @since 2.0.25
-	 *
-	 * @param array $frm_duplicate_ids
-	 * @param array $values
-	 */
-	private static function switch_id_for_section_tracking_field_option( $frm_duplicate_ids, &$values ) {
-		if ( isset( $values['field_options']['in_section'] ) ) {
-			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'in_section', $values['field_options'] );
-		} else {
-			$values['field_options']['in_section'] = 0;
-		}
-	}
-
-	/**
-	 * Switch the get_values_form, get_values_field, and watch_lookup IDs when a field is imported
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param array $frm_duplicate_ids
-	 * @param array $values
-	 */
-	private static function switch_ids_for_lookup_settings( $frm_duplicate_ids, &$values ) {
-		if ( ! FrmField::is_option_true_in_array( $values['field_options'], 'get_values_field' ) ) {
-			return;
-		}
-
-		self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'get_values_field', $values['field_options'] );
-		self::switch_watch_lookup_ids( $frm_duplicate_ids, $values );
-	}
-
-	/**
-	 * Switch the watch_lookup ids when a lookup field is duplicated.
-	 *
-	 * A watched field may come later in the field order and not be duplicated yet, so any id that
-	 * cannot be switched now is left for the second pass in
-	 * FrmProForm::maybe_fix_field_ids_after_duplicate().
-	 *
-	 * @since 6.34
-	 *
-	 * @param array $frm_duplicate_ids Map of original field ids to their new ids.
-	 * @param array $values            Field values, passed by reference.
-	 *
-	 * @return void
-	 */
-	private static function switch_watch_lookup_ids( $frm_duplicate_ids, &$values ) {
-		if ( empty( $values['field_options']['watch_lookup'] ) || ! is_array( $values['field_options']['watch_lookup'] ) ) {
-			return;
-		}
-
-		$has_unresolved_id = false;
-
-		foreach ( $values['field_options']['watch_lookup'] as $key => $old_id ) {
-			if ( isset( $frm_duplicate_ids[ $old_id ] ) ) {
-				$values['field_options']['watch_lookup'][ $key ] = $frm_duplicate_ids[ $old_id ];
-			} elseif ( $old_id ) {
-				$has_unresolved_id = true;
-			}
-		}
-
-		if ( $has_unresolved_id ) {
-			self::mark_field_key_as_unprocessed( $values['field_key'] );
-		}
-	}
-
-	/**
-	 * Switch the field ID for a given setting if a new field ID exists
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param array $frm_duplicate_ids
-	 * @param string $setting
-	 * @param array $field_options
-	 */
-	private static function maybe_switch_field_id_in_setting( $frm_duplicate_ids, $setting, &$field_options ) {
-		$old_field_id = $field_options[ $setting ] ?? 0;
-
-		if ( ! $old_field_id ) {
-			return;
-		}
-
-		if ( is_array( $old_field_id ) ) {
-			$field_options[ $setting ] = array();
-
-			foreach ( $old_field_id as $old_id ) {
-				$field_options[ $setting ][] = $frm_duplicate_ids[ $old_id ] ?? $old_id;
-			}
-		} elseif ( isset( $frm_duplicate_ids[ $old_field_id ] ) ) {
-			$field_options[ $setting ] = $frm_duplicate_ids[ $old_field_id ];
-		}
 	}
 
 	public static function delete( $id ) {

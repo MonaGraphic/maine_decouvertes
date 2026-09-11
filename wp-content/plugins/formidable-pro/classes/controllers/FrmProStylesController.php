@@ -199,13 +199,16 @@ class FrmProStylesController extends FrmStylesController {
 	}
 
 	/**
+	 * Checks whether the bundled ui-lightness stylesheet covers the selected datepicker theme.
+	 *
 	 * @since 3.03
+	 * @since 6.35 Made public so the enqueue can tell a bundled theme from a remote one.
 	 *
 	 * @param string $selected
 	 *
 	 * @return bool
 	 */
-	private static function use_default_style( $selected ) {
+	public static function use_default_style( $selected ) {
 		return ! $selected || 'ui-lightness' === $selected;
 	}
 
@@ -401,6 +404,7 @@ class FrmProStylesController extends FrmStylesController {
 		if ( ! FrmProAppHelper::use_jquery_datepicker() ) {
 			readfile( FrmProAppHelper::plugin_path() . '/css/flatpickr.css' );
 			include FrmProAppHelper::plugin_path() . '/css/flatpickr.css.php';
+			readfile( FrmProAppHelper::plugin_path() . '/css/frm-datepicker.css' );
 		}
 
 		// Using include on a CSS file causes a fatal error when using the Snuffleupagus security module.

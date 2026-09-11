@@ -123,7 +123,7 @@ class FrmProSiteHealthController {
 			),
 			'account/downloads/'
 		);
-		$result['actions'] = '<a href="' . esc_url( $upgrade_link ) . '">' . esc_html__( 'Renew Now', 'formidable' ) . '</a>';
+		$result['actions'] = '<a href="' . esc_url( $upgrade_link ) . '" target="_blank" rel="noopener">' . esc_html__( 'Renew Now', 'formidable' ) . '</a>';
 
 		return $result;
 	}

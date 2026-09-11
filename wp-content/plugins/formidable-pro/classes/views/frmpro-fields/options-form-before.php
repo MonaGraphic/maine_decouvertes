@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php esc_html_e( 'Load Options From', 'formidable-pro' ); ?>
 		</label>
 		<select name="frm_tax_entry_field_<?php echo absint( $field['id'] ); ?>" id="frm_tax_entry_field_<?php echo absint( $field['id'] ); ?>" class="frm_tax_form_select">
-			<option value=""><?php esc_html_e( '&mdash; Select &mdash;', 'formidable-pro' ); ?></option>
+			<option value=""><?php esc_html_e( '&mdash; Select &mdash;', 'formidable' ); ?></option>
 			<option value="form" <?php echo is_object( $selected_field ) ? 'selected="selected"' : ''; ?>>
 				<?php esc_html_e( 'Form Entries', 'formidable' ); ?>
 			</option>

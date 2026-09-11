@@ -37,7 +37,7 @@ class FrmProSquareLiteController {
 		?>
 		<div class="frm_warning_style">
 			<?php
-			esc_html_e( 'The address field selected is not compatible with Square, because it does not include the country code. Select another address type to prevent checkout errors.', 'formidable-pro' ); // phpcs:ignore SlevomatCodingStandard.Files.LineLength.LineTooLong
+			esc_html_e( 'The address field selected is not compatible with Square, because it does not include the country code. Select another address type to prevent checkout errors.', 'formidable' ); // phpcs:ignore SlevomatCodingStandard.Files.LineLength.LineTooLong
 			?>
 		</div>
 		<?php

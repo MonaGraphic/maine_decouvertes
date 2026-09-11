@@ -520,9 +520,6 @@
 	border-color: #569ff7;
 	font-weight: 600;
 }
-.frm-datepicker.flatpickr-calendar:not(.frm-datepicker-custom-theme) .flatpickr-day.selected:not(.inRange) {
-	background-color: var(--date-band-color);
-}
 .frm-datepicker:not(.frm-datepicker-custom-theme) .flatpickr-day.today:not(.inRange):not(.selected):not(.startRange):not(.endRange) {
 	color: var(--date-band-color);
 	font-weight: 600;

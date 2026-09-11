@@ -1172,6 +1172,67 @@ class FrmProNestedFormsController {
 	}
 
 	/**
+	 * Gets IDs of the forms embedded inside the given forms.
+	 *
+	 * The inverse of get_forms_contain_embedded_form(), and deliberately one level deep, which
+	 * is the depth get_search_strings_for_form() actually widens by. Takes every form at once so
+	 * a post embedding several forms still costs a single query.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $form_ids IDs of the forms that may embed others.
+	 *
+	 * @return array
+	 */
+	public static function get_forms_embedded_in_forms( $form_ids ) {
+		if ( ! $form_ids ) {
+			return array();
+		}
+
+		$all_options = FrmDb::get_col(
+			'frm_fields',
+			array(
+				'form_id' => $form_ids,
+				'type'    => 'form',
+			),
+			'field_options'
+		);
+
+		$embedded_ids = array();
+
+		foreach ( $all_options as $field_options ) {
+			// Never maybe_unserialize() a DB value. This parses the string instead of handing it
+			// to PHP's unserialize(), so a crafted field_options row cannot instantiate objects.
+			FrmAppHelper::unserialize_or_decode( $field_options );
+
+			if ( is_array( $field_options ) && ! empty( $field_options['form_select'] ) ) {
+				$embedded_ids[] = intval( $field_options['form_select'] );
+			}
+		}
+
+		return array_values( array_unique( array_filter( $embedded_ids ) ) );
+	}
+
+	/**
+	 * Adds the nested forms whose cached embeds list a post reaches.
+	 *
+	 * Form G's list matches [formidable id=P] whenever form P embeds form G, so a post embedding
+	 * P invalidates G as well. Without this, Lite can only see P and would leave G with a stale
+	 * count.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $affected_form_ids Form IDs whose cached lists are affected.
+	 * @param array $form_ids          Form IDs embedded in the post content.
+	 *
+	 * @return array
+	 */
+	public static function add_nested_forms_affected_by_embed( $affected_form_ids, $form_ids ) {
+		$affected_form_ids = array_merge( $affected_form_ids, self::get_forms_embedded_in_forms( $form_ids ) );
+		return array_values( array_unique( $affected_form_ids ) );
+	}
+
+	/**
 	 * Gets IDs of the forms that contain the embedded form.
 	 *
 	 * @since 6.32

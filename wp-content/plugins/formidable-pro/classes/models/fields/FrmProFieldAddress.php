@@ -140,10 +140,10 @@ class FrmProFieldAddress extends FrmFieldType {
 		return array(
 			'line1'   => '',
 			'line2'   => '',
-			'city'    => __( 'City', 'formidable-pro' ),
-			'state'   => __( 'State/Province', 'formidable-pro' ),
-			'zip'     => __( 'Zip/Postal', 'formidable-pro' ),
-			'country' => __( 'Country', 'formidable-pro' ),
+			'city'    => __( 'City', 'formidable' ),
+			'state'   => __( 'State/Province', 'formidable' ),
+			'zip'     => __( 'Zip/Postal', 'formidable' ),
+			'country' => __( 'Country', 'formidable' ),
 		);
 	}
 
@@ -152,9 +152,9 @@ class FrmProFieldAddress extends FrmFieldType {
 	 */
 	private function all_default_labels() {
 		$labels            = $this->default_labels();
-		$labels['line1']   = __( 'Line 1', 'formidable-pro' );
-		$labels['line2']   = __( 'Line 2', 'formidable-pro' );
-		$labels['country'] = __( 'Country', 'formidable-pro' );
+		$labels['line1']   = __( 'Line 1', 'formidable' );
+		$labels['line2']   = __( 'Line 2', 'formidable' );
+		$labels['country'] = __( 'Country', 'formidable' );
 		return $labels;
 	}
 
@@ -458,7 +458,7 @@ class FrmProFieldAddress extends FrmFieldType {
 		$format = apply_filters( 'frm_zip_format', $format, array( 'field' => $this->field ) );
 
 		if ( $format && ! preg_match( $format, $values['zip'] ) ) {
-			$errors[ 'field' . $args['id'] . '-zip' ] = __( 'This value is invalid', 'formidable-pro' );
+			$errors[ 'field' . $args['id'] . '-zip' ] = __( 'This value is invalid', 'formidable' );
 		}
 	}
 

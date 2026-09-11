@@ -4,11 +4,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $themes     = FrmProStylesController::jquery_themes( $style->post_content['theme_css'] );
-$use_themes = count( $themes ) > 1;
+$use_themes = count( $themes ) > 1 && FrmProAppHelper::use_jquery_datepicker();
 $is_default = 1 === $style->menu_order;
 $show       = 'frm_date_color';
 
-if ( ! $is_default ) {
+// Only the jQuery UI datepicker takes its colors from the default style's jQuery theme.
+// flatpickr reads these settings per style, so the notice would be wrong there.
+if ( ! $is_default && FrmProAppHelper::use_jquery_datepicker() ) {
 	$frm_style     = new FrmStyle( 'default' );
 	$default_style = $frm_style->get_one();
 

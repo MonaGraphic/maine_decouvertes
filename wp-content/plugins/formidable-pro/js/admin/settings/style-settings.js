@@ -1,5 +1,5 @@
 ( function() {
-	/* globals frmDom, wp, jQuery, Dropzone, frmStylerFunctions, frmProStyleSettingsSVGs */
+	/* globals frmDom, wp, jQuery, Dropzone, frmStylerFunctions, frmProStyleSettingsSVGs, flatpickr */
 	'use strict';
 
 	if ( 'object' !== typeof window.frmStylerFunctions ) {
@@ -13,6 +13,11 @@
 		templateCssTag: false // Keep track of this so we can remove the previous tag when adding a new one.
 	};
 	let abortController;
+
+	// How much room an inline range needs before it is worth showing both of its
+	// months. Below this the two share the width a real form gives one, and the day
+	// cells end up too small to tell a style anything.
+	const MIN_WIDTH_FOR_TWO_MONTHS = 380;
 
 	initPreview();
 
@@ -686,7 +691,7 @@
 				 * @returns {void}
 				 */
 				dateField => {
-					if ( dateField.classList.contains( '.frm_date_inline' ) ) {
+					if ( dateField.classList.contains( 'frm_date_inline' ) ) {
 						// Inline datepickers get initialized on load, not on focus.
 						return;
 					}
@@ -694,7 +699,18 @@
 					dateField.addEventListener(
 						'focusin',
 						() => {
-							initializeDatepicker( dateField );
+							if ( ! dateField._flatpickr ) {
+								initializeDatepicker( dateField );
+							}
+
+							// flatpickr binds its own focus handler when it is built, so the
+							// focus that just built it never reaches that handler and the
+							// calendar has to be opened here instead.
+							if ( dateField._flatpickr ) {
+								dateField._flatpickr.open();
+								return;
+							}
+
 							jQuery( dateField ).datepicker( 'show' );
 						}
 					);
@@ -720,14 +736,7 @@
 		 */
 		function initializeDatepicker( target ) {
 			if ( 'undefined' !== typeof flatpickr ) {
-				flatpickr( target, {
-					dateFormat: 'Y-m-d',
-					changeMonth: true,
-					changeYear: true,
-					onReady( selectedDates, dateStr, instance ) {
-						instance.calendarContainer.classList.add( 'frm-datepicker' );
-					}
-				});
+				initializeFlatpickr( target );
 				return;
 			}
 
@@ -744,6 +753,248 @@
 					return options;
 				}
 			});
+		}
+
+		/**
+		 * Build a flatpickr calendar that looks like the one the front end renders.
+		 *
+		 * frmDatepickerPro.getDefaultConfigs cannot be reused here because
+		 * formidablepro.js does not get loaded in the styler, so the options that
+		 * decide how the calendar is laid out are mirrored from it instead. Leaving
+		 * them out gave the preview a calendar the real form never shows: an inline
+		 * field rendered nothing at all, and a date range field opened a single
+		 * month picker.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {HTMLElement|string} target The date input, the div an inline calendar renders into, or a selector for either.
+		 * @return {void}
+		 */
+		function initializeFlatpickr( target ) {
+			const element  = 'string' === typeof target ? document.querySelector( target ) : target;
+			const isInline = element.classList.contains( 'frm_date_inline' );
+			const mode     = isRangeField( element ) ? 'range' : 'single';
+
+			if ( isInline && 'range' === mode ) {
+				// Widen the field before the month count is measured off it.
+				claimHiddenHalfWidth( element );
+			}
+
+			flatpickr( element, {
+				dateFormat: 'Y-m-d',
+				inline: isInline,
+				mode,
+				showMonths: getMonthCount( element, isInline, mode ),
+				monthSelectorType: 'dropdown',
+				// Every front end picker passes this too. Without it the month dropdown
+				// lists full month names, which do not fit the width the header gives
+				// it, so the preview showed a clipped month the real form never shows.
+				shorthandCurrentMonth: true,
+				onReady( selectedDates, dateStr, instance ) {
+					addStyleClassesToCalendar( instance, isInline );
+
+					if ( 'range' === mode ) {
+						restoreStoredRange( instance );
+					}
+				},
+				onChange( selectedDates, dateStr, instance ) {
+					if ( 'range' === mode ) {
+						splitRangeAcrossPair( instance, selectedDates, dateStr );
+					}
+				}
+			});
+		}
+
+		/**
+		 * Give each half of a range pair its own date rather than the range string.
+		 *
+		 * flatpickr writes the whole range into whichever input it is attached to, so
+		 * picking a range leaves "start to end" sitting in the field. A real form
+		 * never shows that: frmDatepickerPro.updateRangeFieldsOnChange splits the
+		 * range, gives each half its own date, and puts both calendars on the same
+		 * range. The styler has no field settings to work from, so it does the same
+		 * off the pairing in the DOM.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {Object} instance      The flatpickr instance that changed.
+		 * @param {Array}  selectedDates The dates flatpickr currently has selected.
+		 * @param {string} dateStr       Both dates as flatpickr formats a range.
+		 * @return {void}
+		 */
+		function splitRangeAcrossPair( instance, selectedDates, dateStr ) {
+			const [ start, end ] = selectedDates;
+
+			// A half picked range has nothing to split yet.
+			if ( ! start || ! end ) {
+				return;
+			}
+
+			const { input } = instance;
+			if ( ! input || 'INPUT' !== input.nodeName ) {
+				return;
+			}
+
+			const format    = ( date ) => flatpickr.formatDate( date, instance.config.dateFormat );
+			const startId   = input.dataset.rangeStartFieldId;
+			const isEndHalf = Boolean( startId );
+
+			input.value            = format( isEndHalf ? end : start );
+			input.dataset.rangeValue = dateStr;
+
+			const partner = isEndHalf
+				? document.querySelector( `input[data-field-id="${ startId }"]` )
+				: document.querySelector( `input[data-range-start-field-id="${ input.dataset.fieldId }"]` );
+
+			if ( ! partner || partner === input ) {
+				return;
+			}
+
+			// A popup half is not built until it is focused, so the range is stashed
+			// for whenever that happens. restoreStoredRange reads it back.
+			partner.dataset.rangeValue = dateStr;
+
+			// setDate does not fire onChange, so this cannot come back around.
+			if ( partner._flatpickr ) {
+				partner._flatpickr.setDate( dateStr );
+			}
+
+			partner.value = format( isEndHalf ? start : end );
+		}
+
+		/**
+		 * Let an inline range calendar use the room its hidden end half leaves behind.
+		 *
+		 * A range whose start renders inline has its end half hidden by the form, so
+		 * the column beside the calendar is empty. A real form is wide enough that
+		 * half of a row still gives the calendar its full size, but the styler's
+		 * preview column is a fraction of that width, and half of it comes out at
+		 * roughly half the size the front end renders. Taking the empty column back
+		 * returns the calendar to about the width a real form gives it.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {HTMLElement} element The div an inline calendar renders into.
+		 * @return {void}
+		 */
+		function claimHiddenHalfWidth( element ) {
+			const container    = element.closest( '.frm_form_field' );
+			const endHalf      = document.querySelector( `[data-range-start-field-id="${ element.dataset.fieldId }"]` );
+			const endContainer = endHalf && endHalf.closest( '.frm_form_field' );
+
+			if ( ! container || ! endContainer || ! endContainer.classList.contains( 'frm_hidden' ) ) {
+				return;
+			}
+
+			container.classList.add( 'frm-styler-inline-range-field' );
+		}
+
+		/**
+		 * Work out how many months an inline range calendar has room for.
+		 *
+		 * The front end always gives an inline range both of its months, and so does
+		 * the styler when the preview is wide enough for them. Formidable sizes an
+		 * inline month to whatever container it is in, so on a narrow preview two of
+		 * them split the width one would normally get and the day cells shrink to
+		 * around half the size a real form renders. One month at close to full size
+		 * represents the style better than two at half of it.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {HTMLElement} element  The div an inline calendar renders into.
+		 * @param {boolean}     isInline Whether this calendar renders inline in the form.
+		 * @param {string}      mode     Either 'range' or 'single'.
+		 * @return {number} How many months the calendar should render.
+		 */
+		function getMonthCount( element, isInline, mode ) {
+			if ( ! isInline || 'range' !== mode ) {
+				return 1;
+			}
+
+			const container = element.closest( '.frm_form_field' );
+
+			return container && container.clientWidth >= MIN_WIDTH_FOR_TWO_MONTHS ? 2 : 1;
+		}
+
+		/**
+		 * Work out whether a date field is one half of a date range.
+		 *
+		 * The class alone is not enough. When the range's start renders inline, the
+		 * form hides the end half, and only that hidden end half carries
+		 * frm_date_range, so an inline range start looks like a plain date field.
+		 * frmDatepickerPro.getDefaultConfigs does not have this problem because it
+		 * also reads isRangeEnabled out of the field's own settings, which the styler
+		 * never loads. The pairing is recovered instead from the end half, which
+		 * points back at the field that starts the range.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {HTMLElement} element The date input, or the div an inline calendar renders into.
+		 * @return {boolean} True when the field is the start or the end of a range.
+		 */
+		function isRangeField( element ) {
+			if ( element.classList.contains( 'frm_date_range' ) ) {
+				return true;
+			}
+
+			const { fieldId } = element.dataset;
+
+			return Boolean( fieldId ) && null !== document.querySelector( `[data-range-start-field-id="${ fieldId }"]` );
+		}
+
+		/**
+		 * Put the range its partner picked back on screen in a range calendar.
+		 *
+		 * A popup half is not built until it is focused, so a range picked on the
+		 * other half has nowhere to go until this one exists. splitRangeAcrossPair
+		 * stashes it on the input for that, and this reads it back.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {Object} instance The flatpickr instance.
+		 * @return {void}
+		 */
+		function restoreStoredRange( instance ) {
+			const { input } = instance;
+
+			if ( ! input || 'INPUT' !== input.nodeName || ! input.dataset.rangeValue ) {
+				return;
+			}
+
+			// The input only carries its own single date, so the range comes back off
+			// data-range-value, which is where the front end keeps it too.
+			const ownDate = input.value;
+			instance.setDate( input.dataset.rangeValue, false );
+			input.value = ownDate;
+		}
+
+		/**
+		 * Copy the previewed form's style classes onto the calendar.
+		 *
+		 * A popup calendar is appended to the body, so it sits outside the previewed
+		 * form and cannot inherit the CSS variables scoped to it. The styler writes
+		 * those variables to a `.frm_style_<key>.with_frm_style` rule, so the
+		 * calendar needs both classes to follow the sidebar as it is edited. This is
+		 * what frmDatepickerPro.getStyleClasses does on the front end.
+		 *
+		 * @since 6.35
+		 *
+		 * @param {Object}  instance The flatpickr instance.
+		 * @param {boolean} isInline Whether this calendar renders inline in the form.
+		 * @return {void}
+		 */
+		function addStyleClassesToCalendar( instance, isInline ) {
+			const { classList } = instance.calendarContainer;
+
+			classList.add( 'frm-datepicker' );
+
+			if ( isInline ) {
+				classList.add( 'frm_date_inline' );
+			}
+
+			getAllFormClasses( instance.element ).forEach(
+				className => classList.add( className )
+			);
 		}
 
 		function getAllFormClasses( input ) {
@@ -1038,6 +1289,10 @@
 				changeMonth: true,
 				changeYear: true,
 				inline: true,
+				// Every front end picker passes this, in frmDatepickerPro.getDefaultConfigs. Without
+				// it the month dropdown lists full month names, which do not fit the width the
+				// header gives it, so the sample showed a clipped month the real form never shows.
+				shorthandCurrentMonth: true,
 				onReady( selectedDates, dateStr, instance ) {
 					instance.calendarContainer.classList.add( 'frm-datepicker', 'frm-datepicker-inline-small' );
 				}

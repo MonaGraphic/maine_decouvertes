@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Formidable Forms Pro plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Formidable Forms Pro 6.34\n"
+"Project-Id-Version: Formidable Forms Pro 6.35\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/formidable-pro\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-11T14:52:09+00:00\n"
+"POT-Creation-Date: 2026-09-09T14:25:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: formidable-pro\n"
@@ -60,59 +60,26 @@ msgstr ""
 msgid "An active license is needed to access new features, add-ons, plugin updates, and our world class support!"
 msgstr ""
 
-#: classes/controllers/FrmProAddonsController.php:707
+#: classes/controllers/FrmProAddonsController.php:708
 msgid "Renew License Now"
 msgstr ""
 
 #. translators: %1$s: HTML break line + open link, %2$s: HTML start b tag, %3$s: HTML close b tag & link
-#: classes/controllers/FrmProAddonsController.php:735
+#: classes/controllers/FrmProAddonsController.php:736
 msgid "Your version of Formidable Forms has been altered and may contain malware!%1$sSwitch to the official version now for %2$s50%% off%3$s"
 msgstr ""
 
-#: classes/controllers/FrmProAddonsController.php:748
+#: classes/controllers/FrmProAddonsController.php:749
 msgid "Heads up! Your plugin has been altered!"
 msgstr ""
 
-#: classes/controllers/FrmProAddonsController.php:759
+#: classes/controllers/FrmProAddonsController.php:760
 msgid "Get 50% Off!"
 msgstr ""
 
 #. translators: %1$s: Comma-separated short add-on names, %2$s: Start link HTML, %3$s: End link HTML
-#: classes/controllers/FrmProAddonsController.php:1073
+#: classes/controllers/FrmProAddonsController.php:1074
 msgid "The following Formidable add-ons require an active Pro license: %1$s. %2$sActivate your license%3$s to use them."
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:190
-#: classes/models/fields/FrmProFieldAddress.php:155
-msgid "Line 1"
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:191
-#: classes/models/fields/FrmProFieldAddress.php:156
-msgid "Line 2"
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:192
-#: classes/controllers/FrmProAddressesController.php:221
-#: classes/helpers/FrmProFieldsHelper.php:5186
-#: classes/models/fields/FrmProFieldAddress.php:146
-#: classes/models/fields/FrmProFieldAddress.php:157
-msgid "Country"
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:218
-#: classes/models/fields/FrmProFieldAddress.php:143
-msgid "City"
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:219
-#: classes/models/fields/FrmProFieldAddress.php:144
-msgid "State/Province"
-msgstr ""
-
-#: classes/controllers/FrmProAddressesController.php:220
-#: classes/models/fields/FrmProFieldAddress.php:145
-msgid "Zip/Postal"
 msgstr ""
 
 #: classes/controllers/FrmProAppController.php:20
@@ -295,54 +262,58 @@ msgstr ""
 msgid "Your license has expired. Renew your license to continue editing entries."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2243
+#: classes/controllers/FrmProEntriesController.php:2244
 msgid "Entries Successfully Deleted"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2247
+#: classes/controllers/FrmProEntriesController.php:2248
 msgid "No Entries Selected"
 msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:2328
-#: classes/controllers/FrmProEntriesController.php:2793
-#: classes/controllers/FrmProEntriesController.php:2876
-#: classes/controllers/FrmProEntriesController.php:3451
+msgid "No Entries Found"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:2329
+#: classes/controllers/FrmProEntriesController.php:2794
+#: classes/controllers/FrmProEntriesController.php:2877
+#: classes/controllers/FrmProEntriesController.php:3452
 msgid "Are you sure you want to delete that entry?"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2347
+#: classes/controllers/FrmProEntriesController.php:2348
 msgid "There are no matching fields. Please check your formresults shortcode to make sure you are using the correct form and field IDs."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3358
+#: classes/controllers/FrmProEntriesController.php:3359
 msgid "Front-end editing is disabled."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3391
+#: classes/controllers/FrmProEntriesController.php:3392
 msgid "You are missing options in your shortcode. A field_id is required."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3569
+#: classes/controllers/FrmProEntriesController.php:3570
 msgid "You are missing options in your shortcode. field_id is required."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3950
+#: classes/controllers/FrmProEntriesController.php:3951
 msgid "There was an error deleting that entry"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3974
+#: classes/controllers/FrmProEntriesController.php:3975
 msgid "Resent to %s"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:3977
+#: classes/controllers/FrmProEntriesController.php:3978
 msgid "Resent to No one! You do not have permission"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:4000
+#: classes/controllers/FrmProEntriesController.php:4001
 msgid "Not receiving emails?"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:4002
+#: classes/controllers/FrmProEntriesController.php:4003
 msgid "Setup SMTP."
 msgstr ""
 
@@ -540,7 +511,7 @@ msgid "Previous"
 msgstr ""
 
 #: classes/controllers/FrmProFormsController.php:927
-#: classes/helpers/FrmProFormsHelper.php:840
+#: classes/helpers/FrmProFormsHelper.php:907
 #: classes/views/frmpro-forms/save-draft-options.php:49
 msgid "Save Draft"
 msgstr ""
@@ -1010,7 +981,7 @@ msgid "The lowest of a set of field values"
 msgstr ""
 
 #: classes/controllers/FrmProGraphsController.php:1541
-#: classes/helpers/FrmProReportsHelper.php:340
+#: classes/helpers/FrmProReportsHelper.php:341
 msgid "Average"
 msgstr ""
 
@@ -1052,7 +1023,7 @@ msgstr ""
 msgid "Q4"
 msgstr ""
 
-#: classes/controllers/FrmProHooksController.php:808
+#: classes/controllers/FrmProHooksController.php:822
 msgid "Formidable User Registration is required for the [frm-login] shortcode to work. Please activate the add-on and reload the page."
 msgstr ""
 
@@ -1156,10 +1127,6 @@ msgstr ""
 msgid "You're using %1$s %2$s. Enjoy!"
 msgstr ""
 
-#: classes/controllers/FrmProSquareLiteController.php:40
-msgid "The address field selected is not compatible with Square, because it does not include the country code. Select another address type to prevent checkout errors."
-msgstr ""
-
 #: classes/controllers/FrmProStatisticsController.php:52
 msgid "You must include a valid field id or key in your stats shortcode."
 msgstr ""
@@ -1188,59 +1155,59 @@ msgstr ""
 msgid "Progress Bars &amp; Rootline"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:331
+#: classes/controllers/FrmProStylesController.php:334
 msgid "Unable to delete style"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:341
+#: classes/controllers/FrmProStylesController.php:344
 msgid "Missing style ID"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:352
+#: classes/controllers/FrmProStylesController.php:355
 msgid "Style not deleted"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:361
+#: classes/controllers/FrmProStylesController.php:364
 msgid "Your styling settings have been deleted."
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:804
+#: classes/controllers/FrmProStylesController.php:808
 msgid "Unable to set style as default"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:814
+#: classes/controllers/FrmProStylesController.php:818
 msgid "Missing target style ID"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:824
+#: classes/controllers/FrmProStylesController.php:828
 msgid "Invalid target style ID"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:946
+#: classes/controllers/FrmProStylesController.php:950
 msgid "This style does not yet exist in the database. Click Update to create this new style."
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:950
+#: classes/controllers/FrmProStylesController.php:954
 msgid "Fields from all pages are shown."
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:975
+#: classes/controllers/FrmProStylesController.php:979
 msgid "Unable to preview style template"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:990
+#: classes/controllers/FrmProStylesController.php:994
 msgid "Template key not specified"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:1000
+#: classes/controllers/FrmProStylesController.php:1004
 msgid "Template did not match with API"
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:1024
+#: classes/controllers/FrmProStylesController.php:1028
 msgid "Unable to successfully install template from API data."
 msgstr ""
 
-#: classes/controllers/FrmProStylesController.php:1035
+#: classes/controllers/FrmProStylesController.php:1039
 msgid "API XML data is not formatted as expected and is not possible to preview."
 msgstr ""
 
@@ -1274,15 +1241,15 @@ msgstr ""
 msgid "CSV cannot be opened."
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:1360
+#: classes/helpers/FrmProAppHelper.php:1375
 msgid "Add/Edit Applications"
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:1361
+#: classes/helpers/FrmProAppHelper.php:1376
 msgid "Access Application Dashboard"
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:1380
+#: classes/helpers/FrmProAppHelper.php:1395
 msgid "Add/Edit Views"
 msgstr ""
 
@@ -1428,221 +1395,221 @@ msgstr ""
 msgid "View all posts filed under %s"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:2013
+#: classes/helpers/FrmProFieldsHelper.php:2071
 msgid "No Categories"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:3566
+#: classes/helpers/FrmProFieldsHelper.php:3624
 msgid "Edit Uploaded File"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:3993
+#: classes/helpers/FrmProFieldsHelper.php:4051
 msgid "Select a value to insert into the box below"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4002
+#: classes/helpers/FrmProFieldsHelper.php:4060
 msgid "Form Fields"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4022
+#: classes/helpers/FrmProFieldsHelper.php:4080
 msgid "Thumbnail"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4031
+#: classes/helpers/FrmProFieldsHelper.php:4089
 msgid "Full Size"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4063
+#: classes/helpers/FrmProFieldsHelper.php:4121
 msgid "Helpers"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4064
+#: classes/helpers/FrmProFieldsHelper.php:4122
 msgid "Admin link to edit the entry"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4067
+#: classes/helpers/FrmProFieldsHelper.php:4125
 msgid "Link to view single page if showing dynamic entries"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4075
+#: classes/helpers/FrmProFieldsHelper.php:4133
 msgid "Add a rotating 'even' or 'odd' class"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4079
+#: classes/helpers/FrmProFieldsHelper.php:4137
 msgid "Default Email Message"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:4107
+#: classes/helpers/FrmProFieldsHelper.php:4165
 msgid "Range Slider"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5179
+#: classes/helpers/FrmProFieldsHelper.php:5237
 msgid "On"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5180
+#: classes/helpers/FrmProFieldsHelper.php:5238
 msgid "Off"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5181
+#: classes/helpers/FrmProFieldsHelper.php:5239
 msgid "Additional name"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5182
+#: classes/helpers/FrmProFieldsHelper.php:5240
 msgid "Birthday"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5183
+#: classes/helpers/FrmProFieldsHelper.php:5241
 msgid "Birthday day"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5184
+#: classes/helpers/FrmProFieldsHelper.php:5242
 msgid "Birthday month"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5185
+#: classes/helpers/FrmProFieldsHelper.php:5243
 msgid "Birthday year"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5187
+#: classes/helpers/FrmProFieldsHelper.php:5245
 msgid "Country name"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5188
+#: classes/helpers/FrmProFieldsHelper.php:5246
 msgid "Current password"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5190
+#: classes/helpers/FrmProFieldsHelper.php:5248
 msgid "Family name"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5191
+#: classes/helpers/FrmProFieldsHelper.php:5249
 msgid "Given name"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5192
+#: classes/helpers/FrmProFieldsHelper.php:5250
 msgid "Honorific prefix"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5193
+#: classes/helpers/FrmProFieldsHelper.php:5251
 msgid "Honorific suffix"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5194
+#: classes/helpers/FrmProFieldsHelper.php:5252
 msgid "IMPP"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5195
+#: classes/helpers/FrmProFieldsHelper.php:5253
 msgid "Language"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5197
+#: classes/helpers/FrmProFieldsHelper.php:5255
 msgid "New password"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5198
+#: classes/helpers/FrmProFieldsHelper.php:5256
 msgid "One time code"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5199
+#: classes/helpers/FrmProFieldsHelper.php:5257
 msgid "Organization"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5200
+#: classes/helpers/FrmProFieldsHelper.php:5258
 msgid "Organization title"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5201
+#: classes/helpers/FrmProFieldsHelper.php:5259
 msgid "Photo"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5202
+#: classes/helpers/FrmProFieldsHelper.php:5260
 msgid "Postal Code"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5203
+#: classes/helpers/FrmProFieldsHelper.php:5261
 msgid "Sex"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5204
+#: classes/helpers/FrmProFieldsHelper.php:5262
 msgid "Street address"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5205
+#: classes/helpers/FrmProFieldsHelper.php:5263
 msgid "Tel"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5206
+#: classes/helpers/FrmProFieldsHelper.php:5264
 msgid "Tel area code"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5207
+#: classes/helpers/FrmProFieldsHelper.php:5265
 msgid "Tel country code"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5208
+#: classes/helpers/FrmProFieldsHelper.php:5266
 msgid "Tel extension"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5209
+#: classes/helpers/FrmProFieldsHelper.php:5267
 msgid "Tel local"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5210
+#: classes/helpers/FrmProFieldsHelper.php:5268
 msgid "Tel national"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5211
+#: classes/helpers/FrmProFieldsHelper.php:5269
 msgid "Transaction amount"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5212
+#: classes/helpers/FrmProFieldsHelper.php:5270
 msgid "Transaction currency"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5213
+#: classes/helpers/FrmProFieldsHelper.php:5271
 msgid "URL"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5214
+#: classes/helpers/FrmProFieldsHelper.php:5272
 msgid "Username"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5264
+#: classes/helpers/FrmProFieldsHelper.php:5322
 msgid "Show password"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5271
+#: classes/helpers/FrmProFieldsHelper.php:5329
 msgid "Hide password"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5301
+#: classes/helpers/FrmProFieldsHelper.php:5359
 msgid "Show Password"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5302
+#: classes/helpers/FrmProFieldsHelper.php:5360
 msgid "Hide Password"
 msgstr ""
 
 #. Translators: %1$d: min selections, %2$d: actual selections count.
-#: classes/helpers/FrmProFieldsHelper.php:5455
+#: classes/helpers/FrmProFieldsHelper.php:5513
 msgid "This field requires a minimum of %1$d selected options but only %2$d were submitted."
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5731
+#: classes/helpers/FrmProFieldsHelper.php:5789
 msgid "remaining"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:5743
+#: classes/helpers/FrmProFieldsHelper.php:5801
 msgid "Sorry, there are no more of this item"
 msgstr ""
 
-#: classes/helpers/FrmProFormsHelper.php:829
-#: classes/helpers/FrmProFormsHelper.php:1305
+#: classes/helpers/FrmProFormsHelper.php:896
+#: classes/helpers/FrmProFormsHelper.php:1372
 msgid "Your draft has been saved."
 msgstr ""
 
-#: classes/helpers/FrmProFormsHelper.php:851
+#: classes/helpers/FrmProFormsHelper.php:918
 msgid "This form is currently closed for submissions."
 msgstr ""
 
@@ -1667,60 +1634,56 @@ msgstr ""
 msgid "Your license has expired. Renew your license to continue viewing reports."
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:310
+#: classes/helpers/FrmProReportsHelper.php:311
 msgid "Answered"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:350
+#: classes/helpers/FrmProReportsHelper.php:351
 msgid "Median"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:555
+#: classes/helpers/FrmProReportsHelper.php:556
 msgid "All Time"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:557
+#: classes/helpers/FrmProReportsHelper.php:558
 msgid "Today"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:558
+#: classes/helpers/FrmProReportsHelper.php:559
 msgid "Yesterday"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:559
+#: classes/helpers/FrmProReportsHelper.php:560
 msgid "This week"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:560
+#: classes/helpers/FrmProReportsHelper.php:561
 msgid "Last week"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:561
+#: classes/helpers/FrmProReportsHelper.php:562
 msgid "Last 30 days"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:562
+#: classes/helpers/FrmProReportsHelper.php:563
 msgid "Last month"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:563
+#: classes/helpers/FrmProReportsHelper.php:564
 msgid "This quarter"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:564
+#: classes/helpers/FrmProReportsHelper.php:565
 msgid "Last quarter"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:565
+#: classes/helpers/FrmProReportsHelper.php:566
 msgid "This year"
 msgstr ""
 
-#: classes/helpers/FrmProReportsHelper.php:566
+#: classes/helpers/FrmProReportsHelper.php:567
 msgid "Last year"
-msgstr ""
-
-#: classes/models/fields/FrmProFieldAddress.php:461
-msgid "This value is invalid"
 msgstr ""
 
 #: classes/models/fields/FrmProFieldBreak.php:34
@@ -2089,7 +2052,8 @@ msgstr ""
 
 #: classes/models/FrmProPageField.php:312
 #: classes/views/frmpro-forms/rootline-settings.php:18
-#: js/src/builder/builder.js:2398
+#: js/src/builder/builder.js:2925
+#: js/admin/builder.js:6533
 msgid "Page %d"
 msgstr ""
 
@@ -2174,18 +2138,6 @@ msgstr ""
 
 #: classes/views/combo-fields/addresses/back-end-field-opts.php:11
 msgid "Square requires the country code in order to validate the address. Select another address type to prevent checkout errors."
-msgstr ""
-
-#: classes/views/combo-fields/addresses/back-end-field-opts.php:18
-msgid "Address Type"
-msgstr ""
-
-#: classes/views/combo-fields/addresses/back-end-field-opts.php:29
-msgid "Europe"
-msgstr ""
-
-#: classes/views/combo-fields/addresses/back-end-field-opts.php:32
-msgid "Other - exclude country field"
 msgstr ""
 
 #: classes/views/combo-fields/addresses/geo-upsell.php:16
@@ -2575,6 +2527,18 @@ msgstr ""
 
 #: classes/views/frmpro-fields/back-end/dates-advanced.php:33
 msgid "More Datepicker Options"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/default-range-value.php:23
+msgid "Pre-fill both slider handles with these values. Users can modify them unless the field is read-only."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/default-range-value.php:29
+msgid "Start Value"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/default-range-value.php:38
+msgid "End Value"
 msgstr ""
 
 #: classes/views/frmpro-fields/back-end/default-terms.php:7
@@ -3048,10 +3012,6 @@ msgstr[1] ""
 msgid "Load Options From"
 msgstr ""
 
-#: classes/views/frmpro-fields/options-form-before.php:12
-msgid "&mdash; Select &mdash;"
-msgstr ""
-
 #: classes/views/frmpro-fields/options-form-before.php:21
 msgid "Category/Taxonomy"
 msgstr ""
@@ -3320,10 +3280,6 @@ msgstr ""
 
 #: classes/views/frmpro-form-actions/_gated_content_pro_settings.php:99
 msgid "When checked, the original access token remains valid after the entry is updated. A new token is still generated and sent."
-msgstr ""
-
-#: classes/views/frmpro-form-actions/_paypal_shipping_billing.php:20
-msgid "Shipping Information"
 msgstr ""
 
 #: classes/views/frmpro-form-actions/_post_taxonomy_row.php:16
@@ -3823,21 +3779,21 @@ msgid "Image Opacity"
 msgstr ""
 
 #. translators: %1$s: Start link HTML, %2$s: End link HTML
-#: classes/views/styles/_date-fields.php:26
+#: classes/views/styles/_date-fields.php:28
 msgid "Make changes to the date themes in the %1$sdefault style%2$s."
 msgstr ""
 
-#: classes/views/styles/_date-fields.php:54
-#: classes/views/styles/_date-fields.php:111
+#: classes/views/styles/_date-fields.php:56
+#: classes/views/styles/_date-fields.php:113
 msgid "Head Color"
 msgstr ""
 
-#: classes/views/styles/_date-fields.php:94
-#: classes/views/styles/_date-fields.php:121
+#: classes/views/styles/_date-fields.php:96
+#: classes/views/styles/_date-fields.php:123
 msgid "Band Color"
 msgstr ""
 
-#: classes/views/styles/_date-fields.php:116
+#: classes/views/styles/_date-fields.php:118
 #: classes/views/styles/_progress-bars.php:156
 msgid "Text Color"
 msgstr ""
@@ -4085,6 +4041,7 @@ msgstr ""
 #: js/admin/applications/applications.js:222
 #: js/admin/taxonomy/frm_application_list.js:103
 #: js/src/view/viewselect.js:39
+#: js/block_views.js:354
 msgid "Views"
 msgstr ""
 
@@ -4189,6 +4146,7 @@ msgstr ""
 
 #: js/admin/applications/common.js:259
 #: js/src/view/viewselect.js:38
+#: js/block_views.js:353
 msgid "View"
 msgstr ""
 
@@ -4282,16 +4240,21 @@ msgstr ""
 
 #: js/admin/builder.js:1
 #: js/src/components/logicRule.js:22
+#: js/admin/builder.js:2464
+#: js/admin/settings.js:2229
 msgid "And"
 msgstr ""
 
 #: js/admin/builder.js:1
 #: js/src/components/logicRule.js:22
+#: js/admin/builder.js:2464
+#: js/admin/settings.js:2229
 msgid "Or"
 msgstr ""
 
 #: js/admin/builder.js:1
 #: js/src/builder/fieldFormula.js:232
+#: js/admin/builder.js:2904
 msgid "Insert Field"
 msgstr ""
 
@@ -4329,66 +4292,69 @@ msgstr ""
 
 #: js/admin/settings.js:1
 #: js/src/settings/index.js:274
+#: js/admin/settings.js:2522
 msgid "Select Image"
 msgstr ""
 
 #: js/admin/settings.js:1
 #: js/src/settings/index.js:276
+#: js/admin/settings.js:2524
 msgid "Use this image"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:55
-#: js/admin/settings/style-settings.js:342
+#: js/admin/settings/style-settings.js:60
+#: js/admin/settings/style-settings.js:347
 msgid "Create new style"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:105
+#: js/admin/settings/style-settings.js:110
 #: js/admin/taxonomy/frm_application_list.js:178
 msgid "Delete"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:113
-#: js/admin/settings/style-settings.js:139
+#: js/admin/settings/style-settings.js:118
+#: js/admin/settings/style-settings.js:144
 msgid "Delete Style"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:125
+#: js/admin/settings/style-settings.js:130
 msgid "Permanently delete this style?"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:136
-#: js/admin/settings/style-settings.js:281
-#: js/admin/settings/style-settings.js:349
+#: js/admin/settings/style-settings.js:141
+#: js/admin/settings/style-settings.js:286
+#: js/admin/settings/style-settings.js:354
 #: js/src/components/license-modal.js:69
+#: js/dashboard.js:2276
 msgid "Cancel"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:157
+#: js/admin/settings/style-settings.js:162
 msgid "Successfully deleted style"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:254
+#: js/admin/settings/style-settings.js:259
 msgid "Duplicate"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:265
-#: js/admin/settings/style-settings.js:284
+#: js/admin/settings/style-settings.js:270
+#: js/admin/settings/style-settings.js:289
 msgid "Duplicate style"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:301
+#: js/admin/settings/style-settings.js:306
 msgid "Set as Default"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:312
+#: js/admin/settings/style-settings.js:317
 msgid "Successfully set style as default"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:413
+#: js/admin/settings/style-settings.js:418
 msgid "Apply style"
 msgstr ""
 
-#: js/admin/settings/style-settings.js:419
+#: js/admin/settings/style-settings.js:424
 msgid "Install and apply style"
 msgstr ""
 
@@ -4507,7 +4473,7 @@ msgid "Embedded in"
 msgstr ""
 
 #: js/admin/taxonomy/frm_application.js:753
-#: js/admin/taxonomy/frm_application.js:989
+#: js/admin/taxonomy/frm_application.js:990
 msgid "Embed"
 msgstr ""
 
@@ -4524,24 +4490,24 @@ msgstr ""
 msgid "Remove from application"
 msgstr ""
 
-#: js/admin/taxonomy/frm_application.js:953
+#: js/admin/taxonomy/frm_application.js:954
 #: js/admin/taxonomy/frm_application_list.js:65
 msgid "Search applications"
 msgstr ""
 
-#: js/admin/taxonomy/frm_application.js:1025
+#: js/admin/taxonomy/frm_application.js:1026
 msgid "Application successfully saved!"
 msgstr ""
 
-#: js/admin/taxonomy/frm_application.js:1061
+#: js/admin/taxonomy/frm_application.js:1062
 msgid "Syncing application"
 msgstr ""
 
-#: js/admin/taxonomy/frm_application.js:1157
+#: js/admin/taxonomy/frm_application.js:1158
 msgid "Your application is up to date"
 msgstr ""
 
-#: js/admin/taxonomy/frm_application.js:1158
+#: js/admin/taxonomy/frm_application.js:1159
 msgid "No new items were found."
 msgstr ""
 
@@ -4557,133 +4523,255 @@ msgstr ""
 msgid "Date Modified"
 msgstr ""
 
-#: js/src/builder/builder.js:471
+#: js/src/builder/builder.js:472
+#: js/admin/builder.js:4080
 msgid "Choose type of slider"
 msgstr ""
 
-#: js/src/builder/builder.js:556
+#: js/src/builder/builder.js:557
+#: js/admin/builder.js:4165
 msgid "Single"
 msgstr ""
 
-#: js/src/builder/builder.js:557
+#: js/src/builder/builder.js:558
+#: js/admin/builder.js:4166
 msgid "Range"
 msgstr ""
 
-#: js/src/builder/builder.js:922
-#: js/src/builder/builder.js:935
+#: js/src/builder/builder.js:1009
+#: js/admin/builder.js:4617
+msgid "The gap between the start and end values cannot be less than the minimum gap."
+msgstr ""
+
+#: js/src/builder/builder.js:1012
+#: js/admin/builder.js:4620
+msgid "The gap between the start and end values cannot be greater than the maximum gap."
+msgstr ""
+
+#: js/src/builder/builder.js:1072
+#: js/admin/builder.js:4680
+msgid "The default values were adjusted to fit between the minimum and maximum values."
+msgstr ""
+
+#: js/src/builder/builder.js:1212
+#: js/src/builder/builder.js:1225
+#: js/admin/builder.js:4820
+#: js/admin/builder.js:4833
 msgid "Please enter a valid number."
 msgstr ""
 
-#: js/src/builder/builder.js:941
+#: js/src/builder/builder.js:1231
+#: js/admin/builder.js:4839
 msgid "Minimum size cannot be greater than maximum size."
 msgstr ""
 
+#: js/src/builder/builder.js:1272
+#: js/src/builder/builder.js:1316
+#: js/admin/builder.js:4880
+#: js/admin/builder.js:4924
+msgid "Default value cannot be less than minimum value."
+msgstr ""
+
+#: js/src/builder/builder.js:1275
+#: js/src/builder/builder.js:1318
+#: js/admin/builder.js:4883
+#: js/admin/builder.js:4926
+msgid "Default value cannot be greater than maximum value."
+msgstr ""
+
+#: js/src/builder/builder.js:1324
+#: js/admin/builder.js:4932
+msgid "End value cannot be less than start value."
+msgstr ""
+
+#: js/src/builder/builder.js:1326
+#: js/admin/builder.js:4934
+msgid "Start value cannot be greater than end value."
+msgstr ""
+
 #. translators: %s: type of the field (date or time)
-#: js/src/builder/builder.js:1219
+#: js/src/builder/builder.js:1701
+#: js/admin/builder.js:5309
 msgid "Disabling the %s range will delete the end %s field. Are you sure you want to continue?"
 msgstr ""
 
-#: js/src/builder/builder.js:1245
+#: js/src/builder/builder.js:1726
+#: js/admin/builder.js:5334
 msgid "%s"
 msgstr ""
 
-#: js/src/builder/builder.js:1312
+#: js/src/builder/builder.js:1839
+#: js/admin/builder.js:5447
 msgid "Start %s"
 msgstr ""
 
-#: js/src/builder/builder.js:1313
+#: js/src/builder/builder.js:1840
+#: js/admin/builder.js:5448
 msgid "End %s"
 msgstr ""
 
+#: js/src/builder/calcFieldShortcodes.js:78
+#: js/admin/builder.js:3218
+msgid "Label"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:106
+#: js/admin/builder.js:3246
+msgid "First"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:107
+#: js/admin/builder.js:3247
+msgid "Middle"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:108
+#: js/admin/builder.js:3248
+msgid "Last"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:133
+#: js/admin/builder.js:3273
+msgid "Line 1"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:134
+#: js/admin/builder.js:3274
+msgid "Line 2"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:135
+#: js/admin/builder.js:3275
+msgid "City"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:136
+#: js/admin/builder.js:3276
+msgid "State/Province"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:137
+#: js/admin/builder.js:3277
+msgid "Zip/Postal"
+msgstr ""
+
+#: js/src/builder/calcFieldShortcodes.js:138
+#: js/admin/builder.js:3278
+msgid "Country"
+msgstr ""
+
 #: js/src/builder/settings/validateProRangeSettings.js:159
+#: js/admin/builder.js:3464
 msgid "Minimum value cannot be greater than or equal to maximum value."
 msgstr ""
 
 #: js/src/builder/settings/validateProRangeSettings.js:191
+#: js/admin/builder.js:3496
 msgid "Step value must be greater than 0."
 msgstr ""
 
 #: js/src/builder/settings/validateProRangeSettings.js:204
+#: js/admin/builder.js:3509
 msgid "Step value cannot be greater than the difference between the minimum and maximum values."
 msgstr ""
 
 #: js/src/builder/settings/validateProRangeSettings.js:240
+#: js/admin/builder.js:3545
 msgid "Minimum gap cannot be greater than maximum gap."
 msgstr ""
 
 #: js/src/builder/settings/validateProRangeSettings.js:251
+#: js/admin/builder.js:3556
 msgid "Maximum gap cannot be greater than the difference between minimum and maximum values."
 msgstr ""
 
 #: js/src/calculator/block.js:55
+#: js/block_calculator.js:558
 msgid "This site does not have any calculator forms."
 msgstr ""
 
 #: js/src/components/license-modal.js:93
+#: js/dashboard.js:2300
 msgid "Enter License"
 msgstr ""
 
 #: js/src/components/license-modal.js:95
+#: js/dashboard.js:2302
 msgid "License Activated"
 msgstr ""
 
 #: js/src/components/license-modal.js:104
+#: js/dashboard.js:2311
 msgid "Get started with Formidable Pro and create advanced custom forms."
 msgstr ""
 
 #. translators: %1$s: HTML start of a tag, %2$s: HTML close of a tag
 #: js/src/components/license-modal.js:112
+#: js/dashboard.js:2319
 msgid "To activate Formidable Pro, paste your license below. %1$sFind your license%2$s."
 msgstr ""
 
 #: js/src/view/block.js:27
+#: js/block_views.js:579
 msgid "Display a View"
 msgstr ""
 
 #: js/src/view/block.js:31
+#: js/block_views.js:583
 msgid "data display"
 msgstr ""
 
 #: js/src/view/block.js:32
+#: js/block_views.js:584
 msgid "show entries"
 msgstr ""
 
 #: js/src/view/block.js:43
+#: js/block_views.js:595
 msgid "This site does not have any Views."
 msgstr ""
 
 #: js/src/view/inspector.js:41
+#: js/block_views.js:489
 msgid "Select a View"
 msgstr ""
 
 #: js/src/view/inspector.js:54
+#: js/block_views.js:502
 msgid "Go to View"
 msgstr ""
 
 #: js/src/view/inspector.js:59
+#: js/block_views.js:507
 msgid "View Filtering"
 msgstr ""
 
 #: js/src/view/inspector.js:67
+#: js/block_views.js:515
 msgid "Limited"
 msgstr ""
 
 #: js/src/view/inspector.js:69
+#: js/block_views.js:517
 msgid "Recommended. Adds automatic paragraphs and line breaks and filters most shortcodes."
 msgstr ""
 
 #: js/src/view/inspector.js:72
+#: js/block_views.js:520
 msgid "Everything"
 msgstr ""
 
 #: js/src/view/inspector.js:74
+#: js/block_views.js:522
 msgid "Use only when shortcodes from other plugins are shown when Limited is selected. May cause conflicts with some plugins."
 msgstr ""
 
 #: js/src/view/inspector.js:77
+#: js/block_views.js:525
 msgid "None"
 msgstr ""
 
 #: js/src/view/inspector.js:87
+#: js/block_views.js:535
 msgid "Shortcode"
 msgstr ""

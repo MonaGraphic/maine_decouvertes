@@ -157,8 +157,12 @@
 	cursor: pointer;
 }
 
-.frm-more-relationships-tag:hover,
-.show > .frm-more-relationships-tag {
+/*
+ * Bootstrap 5 adds the show class to the toggle itself, Bootstrap 4 added it to the parent.
+ * frm-meta-tag is needed to outrank .frm-meta-tag.frm-grey-tag:hover in frm_admin.css.
+ */
+.frm-meta-tag.frm-more-relationships-tag:hover,
+.frm-meta-tag.frm-more-relationships-tag.show {
 	background-color: var(--primary-color);
 	color: #fff;
 }
@@ -179,7 +183,7 @@
 
 .dropdown-item .frm-application-relationship-tag span:first-child {
 	max-width: 100%;
-	background: var(--grey-border);
+	background: var(--grey-300);
 }
 
 #frm_no_modal_results_placeholder:not(.frm_hidden) {

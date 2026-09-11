@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<p><?php esc_html_e( 'Renewing your license grants you access to our legendary support services, form templates, Pro features, and updates for another year.', 'formidable-pro' ); ?></p>
 
 	<p>
-		<a href="<?php echo esc_url( $args['renew_url'] ); ?>" title="" style="<?php echo esc_attr( FrmEmailSummaryHelper::get_button_style( true ) ); ?>margin-top:0;">
+		<a href="<?php echo esc_url( $args['renew_url'] ); ?>" title="" style="<?php echo esc_attr( FrmEmailSummaryHelper::get_button_style( true ) ); ?>margin-top:0;" target="_blank" rel="noopener">
 			<?php esc_html_e( 'Renew Now', 'formidable' ); ?>
 		</a>
 	</p>

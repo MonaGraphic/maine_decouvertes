@@ -254,7 +254,7 @@ class FrmProFormsHelper {
 		$dependencies   = array();
 		$dependencies[] = FrmAppHelper::js_suffix() && FrmProAppController::has_combo_js_file() ? 'formidable' : 'flatpickr';
 
-		wp_enqueue_script( 'flatpickr-locale-' . $locale, FrmProAppHelper::plugin_url() . '/js/utils/flatpickr/l10n/' . $locale . '.js', $dependencies, FrmProDb::$plug_version );
+		FrmProDatepickerAssetsHelper::enqueue_flatpickr_locale( $locale, $dependencies, FrmProDb::$plug_version );
 	}
 
 	/**
@@ -443,7 +443,7 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 				if ( 'label' === $show && is_array( $calc_fields[ $val ]->options ) && is_array( reset( $calc_fields[ $val ]->options ) ) ) {
 					$calc                                = str_replace( $matches[0][ $match_key ], '[' . $calc_fields[ $val ]->id . ' show=' . $show . ']', $calc );
 					$options[ $calc_fields[ $val ]->id ] = array_column( $calc_fields[ $val ]->options, 'label', 'value' );
-				} elseif ( in_array( $show, array( 'first', 'middle', 'last' ), true ) ) {
+				} elseif ( in_array( $show, self::get_calc_sub_field_show_values(), true ) ) {
 					$calc = str_replace( $matches[0][ $match_key ], '[' . $calc_fields[ $val ]->id . ' show=' . $show . ']', $calc );
 				} else {
 					$calc = str_replace( $matches[0][ $match_key ], '[' . $calc_fields[ $val ]->id . ']', $calc );
@@ -509,8 +509,45 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 		}
 
 		echo 'var frmcalcs=' . json_encode( $calc_rules ) . ";\n";
-		echo 'if(typeof __FRMCALC == "undefined"){__FRMCALC=frmcalcs;}';
-		echo 'else{__FRMCALC=jQuery.extend(true,{},__FRMCALC,frmcalcs);}';
+		self::echo_calc_rules_merge_js();
+	}
+
+	/**
+	 * Prints the JavaScript that merges one form's calculation rules into the global __FRMCALC object.
+	 *
+	 * The script itself is js/calc-rules-merge.js, printed inline rather than enqueued because it
+	 * has to run immediately after the `frmcalcs` variable that precedes it, once per form. It
+	 * lives in a .js file so that it reads as JavaScript instead of as a PHP string.
+	 *
+	 * How it merges, and why each rule is what it is:
+	 *
+	 * Every form that loads after the first has to merge instead of overwrite. A plain deep
+	 * jQuery.extend is wrong here because it merges arrays by index, so a second form's shorter
+	 * triggers list replaces entries from the first form and those calculations stop running on
+	 * page load. Reference lists are concatenated instead, objects are merged deeply so per field
+	 * currency settings from each form survive, and scalars such as the date format are copied as
+	 * is. A scalar must never reach jQuery.extend: the date format is a string, and deep merging a
+	 * string enumerates its character indices and hands consumers an object.
+	 *
+	 * Nested lists need the same treatment as the top level one, but only the ones that hold
+	 * references. fields[ id ].total holds the calculations a field feeds, and a repeating
+	 * section's child form is a separate form, so a field referenced by a calculation in the
+	 * parent and by one in the child appears in both lists. Merging those by index dropped the
+	 * parent's entry, and that calculation then stopped updating when the field changed.
+	 *
+	 * Only triggers and total are concatenated, because concatenating every list would corrupt
+	 * options. That one maps an option value to its label, and PHP encodes it as a list rather
+	 * than an object whenever the field's separate values happen to be 0, 1, 2 in order. The
+	 * consumer looks a label up by value, so deduplicating it would drop repeated labels, shift
+	 * every later index down, and return the wrong label. Its content is per field and identical
+	 * in every payload that carries it, so the incoming copy replaces the existing one.
+	 *
+	 * @since 6.35
+	 *
+	 * @return void
+	 */
+	private static function echo_calc_rules_merge_js() {
+		readfile( FrmProAppHelper::plugin_path() . '/js/calc-rules-merge.js' );
 	}
 
 	/**
@@ -520,12 +557,7 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 	 */
 	private static function get_calc_show_value( &$val ) {
 		$before               = $val;
-		$show_values_to_check = array(
-			'label',
-			'first',
-			'middle',
-			'last',
-		);
+		$show_values_to_check = array_merge( array( 'label' ), self::get_calc_sub_field_show_values() );
 
 		foreach ( $show_values_to_check as $show ) {
 			$val = self::replace_show_shortcode( $val, $show );
@@ -643,8 +675,8 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 			}
 		} elseif ( $calc_field->type === 'time' && ! FrmField::is_option_true( $calc_field, 'single_time' ) ) {
 			$html_field_id = '^' . $html_field_id . '_';
-		} elseif ( $calc_field->type === 'name' ) {
-			$html_field_id = self::build_field_call_for_name_field( $calc_field->field_key );
+		} elseif ( self::get_combo_sub_fields( $calc_field->type ) ) {
+			$html_field_id = self::build_field_call_for_combo_field( $calc_field->field_key, self::get_combo_sub_fields( $calc_field->type ) );
 		}
 
 		return '[id' . $html_field_id . '"]';
@@ -660,13 +692,12 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 	 *
 	 * @return string
 	 */
-	private static function build_field_call_for_name_field( $field_key ) {
+	private static function build_field_call_for_combo_field( $field_key, $sub_fields ) {
 		$field_calls = array();
 
 		foreach ( array( '-', '_' ) as $separator ) {
-			foreach ( array( 'first', 'middle', 'last' ) as $subfield ) {
-				$selector = '[id^="field_' . $field_key . $separator . '"][name$="[' . $subfield . ']"]';
-				array_push( $field_calls, $selector );
+			foreach ( $sub_fields as $sub_field ) {
+				$field_calls[] = '[id^="field_' . $field_key . $separator . '"][name$="[' . $sub_field . ']"]';
 			}
 		}
 
@@ -674,6 +705,42 @@ echo $custom_options; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotE
 		$field_call = substr( $field_call, 3 );
 
 		return substr( $field_call, 0, -2 );
+	}
+
+	/**
+	 * Gets the sub field names of each multi-part field type, keyed by field type.
+	 *
+	 * @since 6.35
+	 *
+	 * @param string $field_type The field type to get the sub fields of.
+	 *
+	 * @return array Sub field names, empty for a field type that has none.
+	 */
+	private static function get_combo_sub_fields( $field_type ) {
+		$sub_fields = array(
+			'name'    => array( 'first', 'middle', 'last' ),
+			'address' => array( 'line1', 'line2', 'city', 'state', 'zip', 'country' ),
+		);
+
+		return $sub_fields[ $field_type ] ?? array();
+	}
+
+	/**
+	 * Gets every sub field name that a text calculation can resolve a show= option for,
+	 * like [25 show=city] for an Address field.
+	 *
+	 * @since 6.35
+	 *
+	 * @return array
+	 */
+	private static function get_calc_sub_field_show_values() {
+		$show_values = array();
+
+		foreach ( array( 'name', 'address' ) as $field_type ) {
+			$show_values = array_merge( $show_values, self::get_combo_sub_fields( $field_type ) );
+		}
+
+		return $show_values;
 	}
 
 	/**

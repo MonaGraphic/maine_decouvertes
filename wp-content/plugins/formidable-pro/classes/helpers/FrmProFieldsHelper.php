@@ -1481,18 +1481,16 @@ class FrmProFieldsHelper {
 
 		global $frm_vars;
 
-		if ( false === self::are_logic_rules_needed_for_this_field( $field, $frm_vars ) ) {
+		if ( false === self::are_logic_rules_needed_for_this_field( $field ) ) {
 			return;
 		}
 
-		self::maybe_initialize_global_rules_array( $frm_vars );
+		self::maybe_initialize_global_rules_array();
 
-		$logic_rules = self::get_logic_rules_for_field( $field, $frm_vars );
+		$logic_rules = self::get_logic_rules_for_field( $field );
 
 		foreach ( $field['hide_field'] as $i => $logic_field_id ) {
-			$logic_field = self::get_field_from_conditional_logic( $logic_field_id );
-
-			if ( ! $logic_field ) {
+			if ( ! self::maybe_initialize_logic_field_rules_by_id( $logic_field_id, $field ) ) {
 				continue;
 			}
 
@@ -1500,11 +1498,9 @@ class FrmProFieldsHelper {
 
 			self::add_condition_to_logic_rules( $field, $i, $logic_rules );
 
-			self::maybe_initialize_logic_field_rules( $logic_field, $field, $frm_vars );
-
-			self::add_to_logic_field_dependents( $logic_field_id, $field['id'], $frm_vars );
+			self::add_to_logic_field_dependents( $logic_field_id, $field['id'] );
 		}
-		unset( $i, $logic_field_id, $logic_field );
+		unset( $i, $logic_field_id );
 
 		if ( empty( $add_field ) ) {
 			return;
@@ -1513,9 +1509,9 @@ class FrmProFieldsHelper {
 		// Add current field's logic rules to global rules array
 		$frm_vars['rules'][ $field['id'] ] = $logic_rules;
 
-		self::set_logic_rule_status_to_complete( $field['id'], $frm_vars );
-		self::maybe_add_script_for_confirmation_field( $field, $logic_rules, $frm_vars );
-		self::add_field_to_global_dependent_ids( $field, $logic_rules['fieldType'], $frm_vars );
+		self::set_logic_rule_status_to_complete( $field['id'] );
+		self::maybe_add_script_for_confirmation_field( $field, $logic_rules );
+		self::add_field_to_global_dependent_ids( $field, $logic_rules['fieldType'] );
 	}
 
 	/**
@@ -1524,35 +1520,38 @@ class FrmProFieldsHelper {
 	 * @since 2.01.0
 	 *
 	 * @param array $field
-	 * @param array $frm_vars
 	 *
 	 * @return bool
 	 */
-	private static function are_logic_rules_needed_for_this_field( $field, $frm_vars ) {
-		$logic_rules_needed = true;
+	private static function are_logic_rules_needed_for_this_field( $field ) {
+		global $frm_vars;
 
 		if ( empty( $field['hide_field'] ) || ( empty( $field['hide_opt'] ) && empty( $field['form_select'] ) ) ) {
-			// Field doesn't have conditional logic on it
-			$logic_rules_needed = false;
-		} elseif ( isset( $frm_vars['rules'][ $field['id'] ]['status'] ) && 'complete' === $frm_vars['rules'][ $field['id'] ]['status'] ) {
-			// Field has already been checked
-			$logic_rules_needed = false;
-		} elseif ( FrmAppHelper::doing_ajax() && ( ! isset( $frm_vars['footer_loaded'] ) || $frm_vars['footer_loaded'] !== true ) ) {
-			// Don't load rules again when adding a row in a repeating section or turning the page in a "Submit with ajax" form
-			$logic_rules_needed = false;
+			// Field doesn't have conditional logic on it.
+			return false;
 		}
 
-		return $logic_rules_needed;
+		if ( 'complete' === ( $frm_vars['rules'][ $field['id'] ]['status'] ?? null ) ) {
+			// Field has already been checked.
+			return false;
+		}
+
+		if ( FrmAppHelper::doing_ajax() && true !== ( $frm_vars['footer_loaded'] ?? null ) ) {
+			// Don't load rules again when adding a row in a repeating section or turning the page in a "Submit with ajax" form.
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
 	 * Initialize the $frm_vars rules array if it isn't already initialized
 	 *
 	 * @since 2.01.0
-	 *
-	 * @param array $frm_vars
 	 */
-	private static function maybe_initialize_global_rules_array( &$frm_vars ) {
+	private static function maybe_initialize_global_rules_array() {
+		global $frm_vars;
+
 		if ( empty( $frm_vars['rules'] ) ) {
 			$frm_vars['rules'] = array();
 		}
@@ -1564,11 +1563,12 @@ class FrmProFieldsHelper {
 	 * @since 2.01.0
 	 *
 	 * @param array $field
-	 * @param array $frm_vars
 	 *
 	 * @return array
 	 */
-	private static function get_logic_rules_for_field( $field, $frm_vars ) {
+	private static function get_logic_rules_for_field( $field ) {
+		global $frm_vars;
+
 		if ( ! isset( $frm_vars['rules'][ $field['id'] ] ) ) {
 			return self::initialize_logic_rules_for_field_array( $field, $field['parent_form_id'] );
 		}
@@ -1697,9 +1697,9 @@ class FrmProFieldsHelper {
 	 * @since 2.01.0
 	 *
 	 * @param int $field_id
-	 * @param array $frm_vars
 	 */
-	private static function set_logic_rule_status_to_complete( $field_id, &$frm_vars ) {
+	private static function set_logic_rule_status_to_complete( $field_id ) {
+		global $frm_vars;
 		$frm_vars['rules'][ $field_id ]['status'] = 'complete';
 	}
 
@@ -1713,8 +1713,47 @@ class FrmProFieldsHelper {
 	 * @return false|object
 	 */
 	private static function get_field_from_conditional_logic( $logic_field_id ) {
-		// TODO: maybe get rid of the getOne call here if the field already exists in $frm_vars['rules']?
 		return is_numeric( $logic_field_id ) ? FrmField::getOne( $logic_field_id ) : false;
+	}
+
+	/**
+	 * Make sure a logic field has rules, and report whether the field can be used for logic.
+	 *
+	 * A field is looked up once per condition row that targets it, but the rules for that field
+	 * only ever get built the first time. Every later row hits the isset check in
+	 * maybe_initialize_logic_field_rules and does nothing with the object it just loaded.
+	 * Those repeat loads are not free even when the object cache is warm, because
+	 * FrmField::getOne unserializes field_options and unslashes the whole row every call,
+	 * so a form with a lot of conditional logic pays for hundreds of discarded lookups.
+	 * Check the rules array first and only load the field when the rules are actually missing.
+	 *
+	 * @since 6.34
+	 *
+	 * @param int|string $logic_field_id  ID of the field the condition is watching.
+	 * @param array      $dependent_field The field the conditional logic belongs to.
+	 *
+	 * @return bool False when the logic field no longer exists.
+	 */
+	private static function maybe_initialize_logic_field_rules_by_id( $logic_field_id, $dependent_field ) {
+		global $frm_vars;
+
+		if ( ! is_numeric( $logic_field_id ) ) {
+			return false;
+		}
+
+		if ( isset( $frm_vars['rules'][ $logic_field_id ] ) ) {
+			return true;
+		}
+
+		$logic_field = self::get_field_from_conditional_logic( $logic_field_id );
+
+		if ( ! $logic_field ) {
+			return false;
+		}
+
+		self::maybe_initialize_logic_field_rules( $logic_field, $dependent_field );
+
+		return true;
 	}
 
 	/**
@@ -1762,15 +1801,18 @@ class FrmProFieldsHelper {
 	 *
 	 * @param object $logic_field
 	 * @param array $dependent_field
-	 * @param array $frm_vars
 	 */
-	private static function maybe_initialize_logic_field_rules( $logic_field, $dependent_field, &$frm_vars ) {
-		if ( ! isset( $frm_vars['rules'][ $logic_field->id ] ) ) {
-			if ( self::is_logic_field_in_embedded_form_with_dependent_field( $logic_field, $dependent_field ) ) {
-				$logic_field->in_embed_form = $dependent_field['in_embed_form'];
-			}
-			$frm_vars['rules'][ $logic_field->id ] = self::initialize_logic_rules_for_fields_object( $logic_field, $dependent_field['parent_form_id'] );
+	private static function maybe_initialize_logic_field_rules( $logic_field, $dependent_field ) {
+		global $frm_vars;
+
+		if ( isset( $frm_vars['rules'][ $logic_field->id ] ) ) {
+			return;
 		}
+
+		if ( self::is_logic_field_in_embedded_form_with_dependent_field( $logic_field, $dependent_field ) ) {
+			$logic_field->in_embed_form = $dependent_field['in_embed_form'];
+		}
+		$frm_vars['rules'][ $logic_field->id ] = self::initialize_logic_rules_for_fields_object( $logic_field, $dependent_field['parent_form_id'] );
 	}
 
 	/**
@@ -1814,13 +1856,26 @@ class FrmProFieldsHelper {
 	/**
 	 * Add dependent field to logic field's dependents
 	 *
+	 * A field with several conditions watching the same logic field used to be added once per
+	 * condition row, so the front end re-evaluated that field once per duplicate every time the
+	 * logic field changed. Keep the list unique, since hideOrShowFieldById only needs it once.
+	 *
 	 * @since 2.01.0
 	 *
 	 * @param int $logic_field_id
 	 * @param int $dep_field_id
-	 * @param array $frm_vars
 	 */
-	private static function add_to_logic_field_dependents( $logic_field_id, $dep_field_id, &$frm_vars ) {
+	private static function add_to_logic_field_dependents( $logic_field_id, $dep_field_id ) {
+		global $frm_vars;
+
+		$dependents = $frm_vars['rules'][ $logic_field_id ]['dependents'];
+
+		foreach ( $dependents as $dependent ) {
+			if ( (string) $dependent === (string) $dep_field_id ) {
+				return;
+			}
+		}
+
 		$frm_vars['rules'][ $logic_field_id ]['dependents'][] = $dep_field_id;
 	}
 
@@ -1831,11 +1886,12 @@ class FrmProFieldsHelper {
 	 *
 	 * @param array $field
 	 * @param array $logic_rules
-	 * @param array $frm_vars
 	 *
 	 * @return void
 	 */
-	private static function maybe_add_script_for_confirmation_field( $field, $logic_rules, &$frm_vars ) {
+	private static function maybe_add_script_for_confirmation_field( $field, $logic_rules ) {
+		global $frm_vars;
+
 		// TODO: maybe move confirmation field inside of field div
 		if ( FrmField::is_option_empty( $field, 'conf_field' ) ) {
         	return;
@@ -1848,7 +1904,7 @@ class FrmProFieldsHelper {
         $frm_vars['rules'][ 'conf_' . $field['id'] ] = $conf_field_rules;
 
         // Add to all logic field dependents
-        self::add_conf_field_to_logic_field_dependents( $conf_field_rules, $frm_vars );
+        self::add_conf_field_to_logic_field_dependents( $conf_field_rules );
 	}
 
 	/**
@@ -1857,11 +1913,12 @@ class FrmProFieldsHelper {
 	 * @since 2.01.0
 	 *
 	 * @param array $conf_field_rules
-	 * @param array $frm_vars
 	 */
-	private static function add_conf_field_to_logic_field_dependents( $conf_field_rules, &$frm_vars ) {
+	private static function add_conf_field_to_logic_field_dependents( $conf_field_rules ) {
+		global $frm_vars;
+
 		foreach ( $conf_field_rules['conditions'] as $condition ) {
-			self::add_to_logic_field_dependents( $condition['fieldId'], $conf_field_rules['fieldId'], $frm_vars );
+			self::add_to_logic_field_dependents( $condition['fieldId'], $conf_field_rules['fieldId'] );
 		}
 	}
 
@@ -1872,11 +1929,12 @@ class FrmProFieldsHelper {
 	 *
 	 * @param array $field
 	 * @param string $original_field_type
-	 * @param array $frm_vars
 	 *
 	 * @return void
 	 */
-	private static function add_field_to_global_dependent_ids( $field, $original_field_type, &$frm_vars ) {
+	private static function add_field_to_global_dependent_ids( $field, $original_field_type ) {
+		global $frm_vars;
+
 		if ( $original_field_type === 'data' ) {
 			// Add to dep_dynamic_fields
 			if ( ! isset( $frm_vars['dep_dynamic_fields'] ) ) {
@@ -5183,7 +5241,7 @@ class FrmProFieldsHelper {
 			'bday-day'             => __( 'Birthday day', 'formidable-pro' ),
 			'bday-month'           => __( 'Birthday month', 'formidable-pro' ),
 			'bday-year'            => __( 'Birthday year', 'formidable-pro' ),
-			'country'              => __( 'Country', 'formidable-pro' ),
+			'country'              => __( 'Country', 'formidable' ),
 			'country-name'         => __( 'Country name', 'formidable-pro' ),
 			'current-password'     => __( 'Current password', 'formidable-pro' ),
 			'email'                => __( 'Email', 'formidable' ),

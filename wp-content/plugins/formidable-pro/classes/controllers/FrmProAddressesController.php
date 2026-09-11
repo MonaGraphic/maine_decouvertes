@@ -187,9 +187,9 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	private static function get_field_label( $field, $field_name ) {
 		$default_labels            = self::default_labels();
 		$descriptions              = array_keys( $default_labels );
-		$default_labels['line1']   = __( 'Line 1', 'formidable-pro' );
-		$default_labels['line2']   = __( 'Line 2', 'formidable-pro' );
-		$default_labels['country'] = __( 'Country', 'formidable-pro' );
+		$default_labels['line1']   = __( 'Line 1', 'formidable' );
+		$default_labels['line2']   = __( 'Line 2', 'formidable' );
+		$default_labels['country'] = __( 'Country', 'formidable' );
 
 		$label = $default_labels[ $field_name ] ?? '';
 
@@ -215,10 +215,10 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		return array(
 			'line1'   => '',
 			'line2'   => '',
-			'city'    => __( 'City', 'formidable-pro' ),
-			'state'   => __( 'State/Province', 'formidable-pro' ),
-			'zip'     => __( 'Zip/Postal', 'formidable-pro' ),
-			'country' => __( 'Country', 'formidable-pro' ),
+			'city'    => __( 'City', 'formidable' ),
+			'state'   => __( 'State/Province', 'formidable' ),
+			'zip'     => __( 'Zip/Postal', 'formidable' ),
+			'country' => __( 'Country', 'formidable' ),
 		);
 	}
 

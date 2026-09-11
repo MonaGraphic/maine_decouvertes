@@ -928,11 +928,12 @@
 		});
 		if ( data.length > numberToShowInCell ) {
 			const moreTag = getRelationshipTag({ label: '...' }, true );
-			moreTag.classList.add( 'frm-more-relationships-tag', 'frm-dropdown-trigger' );
-			moreTag.setAttribute( 'data-toggle', 'dropdown' );
+			moreTag.classList.add( 'frm-more-relationships-tag' );
+			// Bootstrap 5 uses data-bs-toggle instead of data-toggle, and requires that the menu has the dropdown-menu class.
+			moreTag.setAttribute( 'data-bs-toggle', 'dropdown' );
 
 			const dropdownMenu = div({
-				className: 'frm-dropdown-menu',
+				className: 'frm-dropdown-menu dropdown-menu',
 				children: data.slice( numberToShowInCell ).map(
 					data => div({
 						className: 'dropdown-item',

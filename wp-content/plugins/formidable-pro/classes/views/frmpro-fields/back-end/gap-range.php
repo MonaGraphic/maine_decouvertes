@@ -19,13 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<label for="frm_min_gap_<?php echo esc_attr( $field['field_key'] ); ?>" class="frm_form_field frm-gap-min frm-block frm-mb-6 frm-text-grey-700">
 				<?php esc_html_e( 'Min Gap', 'formidable-pro' ); ?>
 			</label>
-			<input id="frm_min_gap_<?php echo esc_attr( $field['field_key'] ); ?>" type="text" name="field_options[mingap_<?php echo absint( $field['id'] ); ?>]" value="<?php echo esc_attr( $field['mingap'] ); ?>" data-changeme="field_<?php echo esc_attr( $field['field_key'] ); ?>" />
+			<input id="frm_min_gap_<?php echo esc_attr( $field['field_key'] ); ?>" type="number" step="any" min="0" name="field_options[mingap_<?php echo absint( $field['id'] ); ?>]" value="<?php echo esc_attr( $field['mingap'] ); ?>" data-changeme="field_<?php echo esc_attr( $field['field_key'] ); ?>" />
 		</span>
 		<span class="frm6">
 			<label for="frm_max_gap_<?php echo esc_attr( $field['field_key'] ); ?>" class="frm_last frm_form_field frm-block frm-mb-6 frm-text-grey-700">
 				<?php esc_html_e( 'Max Gap', 'formidable-pro' ); ?>
 			</label>
-			<input id="frm_max_gap_<?php echo esc_attr( $field['field_key'] ); ?>" type="text" name="field_options[maxgap_<?php echo absint( $field['id'] ); ?>]" value="<?php echo esc_attr( $field['maxgap'] ); ?>" data-changeme="field_<?php echo esc_attr( $field['field_key'] ); ?>" />
+			<input id="frm_max_gap_<?php echo esc_attr( $field['field_key'] ); ?>" type="number" step="any" min="0" name="field_options[maxgap_<?php echo absint( $field['id'] ); ?>]" value="<?php echo esc_attr( $field['maxgap'] ); ?>" data-changeme="field_<?php echo esc_attr( $field['field_key'] ); ?>" />
 		</span>
 	</span>
 </p>

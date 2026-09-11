@@ -324,13 +324,36 @@ class FrmProFieldDate extends FrmFieldType {
 	}
 
 	/**
-	 * @param mixed $value
-	 * @param array $atts
+	 * Reads an imported date with the site's own date format before falling
+	 * back to strtotime, which would read 26/04/2021 on a d/m/Y site as
+	 * 1970-01-01 and 05/04/2021 as May 4 instead of April 5.
 	 *
-	 * @return string
+	 * This runs for CSV and XML imports and for values sent to the REST API.
+	 *
+	 * A value that cannot be read at all comes back untouched, the way the base
+	 * class treats a value it has nothing to do with. That keeps the failure
+	 * visible: the REST API hands it to validation, which reports an invalid
+	 * date instead of clearing the field and answering with a success. An import
+	 * does not validate, so it drops the value itself. See
+	 * FrmProXMLHelper::convert_field_values().
+	 *
+	 * @param mixed $value
+	 * @param array $atts  A CSV import passes `date_format` when the file itself
+	 *                     proved which of the day and month comes first.
+	 *
+	 * @return mixed The date as Y-m-d, or the value as it arrived.
 	 */
 	protected function prepare_import_value( $value, $atts ) {
-		return ! is_string( $value ) || ! $value ? '' : gmdate( 'Y-m-d', strtotime( $value ) );
+		$from_format = ! empty( $atts['date_format'] ) ? (string) $atts['date_format'] : '';
+		$date        = FrmProDateFormatHelper::parse_date_in_any_format( $value, 'Y-m-d', $from_format );
+
+		if ( '' !== $date ) {
+			return $date;
+		}
+
+		// Nothing could be read. Hand a string back so the caller can report it
+		// as an invalid date, and empty for anything that never held one.
+		return is_string( $value ) ? $value : '';
 	}
 
 	/**

@@ -1890,12 +1890,13 @@ class FrmProEntriesController {
 	private static function show_expired_edit_error() {
 		FrmAppController::show_error_modal(
 			array(
-				'title'         => __( 'You can\'t edit the entry', 'formidable-pro' ),
-				'body'          => __( 'Your license has expired. Renew your license to continue editing entries.', 'formidable-pro' ),
-				'cancel_url'    => admin_url( 'admin.php?page=formidable-entries' ),
-				'cancel_text'   => __( 'Go Back', 'formidable' ),
-				'continue_url'  => FrmAppHelper::admin_upgrade_link( 'expired-edit-entry', 'account/downloads/' ),
-				'continue_text' => __( 'Renew Now', 'formidable' ),
+				'title'           => __( 'You can\'t edit the entry', 'formidable-pro' ),
+				'body'            => __( 'Your license has expired. Renew your license to continue editing entries.', 'formidable-pro' ),
+				'cancel_url'      => admin_url( 'admin.php?page=formidable-entries' ),
+				'cancel_text'     => __( 'Go Back', 'formidable' ),
+				'continue_url'    => FrmAppHelper::admin_upgrade_link( 'expired-edit-entry', 'account/downloads/' ),
+				'continue_text'   => __( 'Renew Now', 'formidable' ),
+				'continue_target' => '_blank',
 			)
 		);
 	}
@@ -2324,7 +2325,7 @@ class FrmProEntriesController {
 				'edit_link'   => false,
 				'delete_link' => false,
 				'page_id'     => false,
-				'no_entries'  => __( 'No Entries Found', 'formidable' ),
+				'no_entries'  => __( 'No Entries Found', 'formidable-pro' ),
 				'confirm'     => __( 'Are you sure you want to delete that entry?', 'formidable-pro' ),
 				'drafts'      => '0',
 			),

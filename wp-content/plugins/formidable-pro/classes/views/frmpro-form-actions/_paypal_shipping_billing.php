@@ -17,7 +17,7 @@ if ( is_callable( 'FrmTransLitePaymentsController::maybe_hide_payment_setting' )
 ?>
 <div <?php FrmAppHelper::array_to_html_params( $div_attrs, true ); ?>>
 	<h3>
-		<?php esc_html_e( 'Shipping Information', 'formidable-pro' ); ?>
+		<?php esc_html_e( 'Shipping Information', 'formidable' ); ?>
 	</h3>
 
 	<p class="frm6">

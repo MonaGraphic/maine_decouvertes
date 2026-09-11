@@ -7,21 +7,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FrmProXMLHelper {
 
 	/**
-	 * @var bool Used for legacy format. Set to true when uploading a file with -legacy at the end of the name.
-	 */
-	private static $legacy_import_format = false;
-
-	/**
 	 * @since 6.34
+	 * @since 6.35  imported_fields_with_lookup replaced by imported_fields_with_field_ids, which
+	 *             tracks every setting in the FrmProField::field_id_settings() registry.
 	 *
 	 * @var array {
-	 *     fields_id_map: array,               // Maps original field ids from the imported file to the new field ids in the database.
-	 *     imported_fields_with_lookup: array, // Watch_lookup ids of imported lookup fields, indexed by form id then by the new field id.
+	 *     fields_id_map: array,                  // Maps original field ids from the imported file to the new field ids in the database.
+	 *     imported_fields_with_field_ids: array, // Original values of every setting that stores a field id, indexed by the new field id.
 	 * }
 	 */
 	private static $xml_import_fields_data = array(
-		'fields_id_map'               => array(),
-		'imported_fields_with_lookup' => array(),
+		'fields_id_map'                  => array(),
+		'imported_fields_with_field_ids' => array(),
 	);
 
 	/**
@@ -222,291 +219,6 @@ class FrmProXMLHelper {
 		}
 	}
 
-	public static function import_csv( $path, $form_id, $field_ids, $entry_key = 0, $start_row = 2, $del = ',', $max = 250 ) {
-		if ( ! defined( 'WP_IMPORTING' ) ) {
-			define( 'WP_IMPORTING', true );
-		}
-
-		$form_id = (int) $form_id;
-
-		if ( ! $form_id ) {
-			return $start_row;
-		}
-
-		// Remove time limit to execute this function
-		if ( function_exists( 'set_time_limit' ) ) {
-			set_time_limit( 0 );
-		}
-
-		$field_ids = array_filter( $field_ids );
-
-		/**
-		 * Allows adding fixed meta values.
-		 *
-		 * Some field types might not appear in the CSV file (Example: Likert field), but we need to set the meta value
-		 * for them when importing.
-		 *
-		 * The return value should be an empty array or an array like this:
-		 * array(
-		 *     13 => 'meta value', // 13 is the field ID, this field is outside of Repeater or Embed Form.
-		 *     '13_10' => 'meta value', // 13 is the field ID, 10 is the Repeater or Embed Form ID which that field is inside.
-		 * )
-		 *
-		 * @since 5.4
-		 *
-		 * @param array $fixed_meta_values Fixed meta values.
-		 * @param array $args              Contains `form_id`.
-		 */
-		$fixed_meta_values = apply_filters( 'frm_pro_csv_import_fixed_meta_values', array(), compact( 'form_id' ) );
-
-		self::check_csv_filename_for_legacy_format( $path );
-
-		$f = fopen( $path, 'r' );
-
-		if ( $f ) {
-			unset( $path );
-			$row       = 0;
-			$headers   = array();
-			$enclosure = '"';
-			$escape    = '\\';
-
-			while ( ( $data = fgetcsv( $f, 100000, $del, $enclosure, $escape ) ) !== false ) {
-				++$row;
-
-				if ( $row === 1 ) {
-					$headers = $data;
-				}
-
-				if ( $start_row > $row ) {
-					continue;
-				}
-
-				$comments = self::get_comments_from_row( $row, $data, $headers );
-
-				$values = array(
-					'form_id'   => $form_id,
-					'item_meta' => array(),
-				);
-
-				foreach ( $field_ids as $key => $field_id ) {
-					self::csv_to_entry_value( $key, $field_id, $data, $values );
-					unset( $key, $field_id );
-				}
-
-				self::maybe_add_fixed_meta_values( $fixed_meta_values, $values );
-				self::convert_db_cols( $values );
-				self::convert_timestamps( $values );
-				self::save_or_edit_entry( $values, $comments );
-
-				unset( $_POST, $values );
-				$_POST['form_id'] = $form_id; // $form_id is set from $_POST['form_id'], so set it back again after the unset line above.
-
-				if ( $row - $start_row >= $max ) {
-					fclose( $f );
-					return $row;
-				}
-			}
-
-			fclose( $f );
-			return $row;
-		}
-	}
-
-	/**
-	 * Maybe add fixed meta values to entry meta.
-	 *
-	 * @since 5.4.1
-	 *
-	 * @param array $fixed_meta_values Fixed meta values.
-	 * @param array $values            Entry data.
-	 */
-	private static function maybe_add_fixed_meta_values( $fixed_meta_values, &$values ) {
-		if ( ! $fixed_meta_values ) {
-			return;
-		}
-
-		foreach ( $fixed_meta_values as $fixed_meta_field => $fixed_meta_value ) {
-			if ( is_numeric( $fixed_meta_field ) ) {
-				$values['item_meta'][ $fixed_meta_field ] = $fixed_meta_value;
-				continue;
-			}
-
-			list( $field_id, $section_id ) = explode( '_', $fixed_meta_field );
-
-			foreach ( $values['item_meta'] as $meta_field => $meta_value ) {
-				if ( intval( $meta_field ) !== intval( $section_id ) || ! is_array( $meta_value ) ) {
-					continue;
-				}
-
-				foreach ( $meta_value as $key => $value ) {
-					if ( ! is_numeric( $key ) || ! is_array( $value ) ) {
-						continue;
-					}
-					$values['item_meta'][ $meta_field ][ $key ][ $field_id ] = $fixed_meta_value;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Before support for importing into a repeater with multiple rows, it was possible to import csv values from a single row.
-	 * To support this previous format backwards, a file uploaded with -legacy in the filename will import differently.
-	 *
-	 * @param string $path the path we're importing. If it includes -legacy, the flag will be set to true.
-	 */
-	private static function check_csv_filename_for_legacy_format( $path ) {
-		self::$legacy_import_format = str_contains( basename( $path ), '-legacy' );
-	}
-
-	/**
-	 * @param array $data
-	 * @param array $values
-	 */
-	private static function csv_to_entry_value( $key, $field_id, $data, &$values ) {
-		$data[ $key ] = $data[ $key ] ?? '';
-
-		if ( is_numeric( $field_id ) ) {
-			self::set_values_for_fields( $key, $field_id, $data, $values );
-			return;
-		}
-
-		if ( is_array( $field_id ) ) {
-			self::set_values_for_data_fields( $key, $field_id, $data, $values );
-			return;
-		}
-
-		// If this has format `{field_id_number}_{subfield_name}`, this is the combo subfield.
-		$check_combo = self::check_combo_field_export_col( $field_id );
-
-		if ( $check_combo ) {
-			self::set_values_for_combo_fields( $data[ $key ], $check_combo[0], $check_combo[1], $values );
-			return;
-		}
-
-		$values[ $field_id ] = $data[ $key ];
-	}
-
-	/**
-	 * Checks if the given column id is a column of combo field.
-	 *
-	 * @since 4.10.02
-	 *
-	 * @param string $col_id Column ID.
-	 *
-	 * @return array|false Return array with first item is the field ID and second item is subfield name.
-	 */
-	private static function check_combo_field_export_col( $col_id ) {
-		if ( ! is_string( $col_id ) ) {
-			return false;
-		}
-
-		$sep   = '_';
-		$parts = explode( $sep, $col_id );
-
-		if ( 2 > count( $parts ) ) {
-			return false;
-		}
-
-		if ( empty( $parts[0] ) || empty( $parts[1] ) || ! is_numeric( $parts[0] ) ) {
-			return false;
-		}
-
-		$field_id = array_shift( $parts );
-
-		return array( $field_id, implode( $sep, $parts ) );
-	}
-
-	/**
-	 * Called by self::csv_to_entry_value
-	 *
-	 * @param int        $key
-	 * @param int|string $field_id
-	 * @param array      $data
-	 * @param array      $values
-	 */
-	private static function set_values_for_fields( $key, $field_id, $data, &$values ) {
-		$field = self::get_field( $field_id );
-
-		/**
-		 * Allows modifying field to be imported.
-		 *
-		 * @since 5.4
-		 *
-		 * @param object $field Field object.
-		 * @param array  $args  Contains `field_id`.
-		 */
-		$field = apply_filters( 'frm_pro_get_field_for_import', $field, compact( 'field_id' ) );
-
-		$section_id = self::check_field_for_section_id( $field );
-
-		$values['item_meta'][ $field_id ] = apply_filters( 'frm_import_val', $data[ $key ], $field );
-		self::convert_field_values( $field, $field_id, $values['item_meta'] );
-		$value = $values['item_meta'][ $field_id ];
-
-		if ( $field->type === 'user_id' ) {
-			$_POST['frm_user_id']  = $value;
-			$values['frm_user_id'] = $value;
-		}
-
-		if ( $section_id ) {
-			self::set_section_field_value( $section_id, $field->form_id, $field_id, $value, $values );
-			return;
-		}
-
-		$item_meta     = FrmAppHelper::get_post_param( 'item_meta', array() );
-		$is_array_type = $field->type === 'checkbox' || ( $field->type === 'data' && $field->field_options['data_type'] !== 'checkbox' );
-
-		if ( $value && $is_array_type && ! empty( $item_meta[ $field_id ] ) ) {
-			$value = array_merge( (array) $item_meta[ $field_id ], (array) $value );
-		}
-
-		$values['item_meta'][ $field_id ] = $value;
-		$_POST['item_meta'][ $field_id ]  = $value;
-	}
-
-	/**
-	 * Sets values for combo fields.
-	 *
-	 * @since 4.11.0
-	 *
-	 * @param string $value          Value get from CSV.
-	 * @param int    $field_id       Field ID.
-	 * @param string $sub_field_name Subfield name.
-	 * @param array  $values         Import values.
-	 */
-	private static function set_values_for_combo_fields( $value, $field_id, $sub_field_name, &$values ) {
-		$field      = self::get_field( $field_id );
-		$section_id = self::check_field_for_section_id( $field );
-
-		if ( ! $section_id ) {
-			if ( ! isset( $values['item_meta'][ $field_id ] ) || ! is_array( $values['item_meta'][ $field_id ] ) ) {
-				$values['item_meta'][ $field_id ] = array();
-			}
-
-			$values['item_meta'][ $field_id ][ $sub_field_name ] = $value;
-			$_POST['item_meta'][ $field_id ]                     = $values['item_meta'][ $field_id ];
-			return;
-		}
-
-		if ( isset( $values['item_meta'][ $section_id ] ) ) {
-			$index = count( $values['item_meta'][ $section_id ] ) - 2; // Because of 'form' element.
-		} else {
-			$values['item_meta'][ $section_id ] = array( 'form' => $field->form_id );
-			$index                              = 0;
-		}
-
-		if ( isset( $values['item_meta'][ $section_id ][ $index ][ $field_id ][ $sub_field_name ] ) ) {
-			++$index;
-			$values['item_meta'][ $section_id ][ $index ]                                 = array();
-			$values['item_meta'][ $section_id ][ $index ][ $field_id ]                    = array();
-			$values['item_meta'][ $section_id ][ $index ][ $field_id ][ $sub_field_name ] = $value;
-		} else {
-			$values['item_meta'][ $section_id ][ $index ][ $field_id ][ $sub_field_name ] = $value;
-		}
-
-		$_POST['item_meta'][ $section_id ] = $values['item_meta'][ $section_id ];
-	}
-
 	/**
 	 * Gets field for import.
 	 *
@@ -534,186 +246,23 @@ class FrmProXMLHelper {
 	}
 
 	/**
-	 * @param object $field
+	 * Imports a batch of entries from a CSV.
 	 *
-	 * @return false|int
+	 * The work lives in FrmProCSVImportHelper. This stays here because it is the
+	 * entry point other code already calls, including the Locations add on.
+	 *
+	 * @param string     $path      Path to the CSV.
+	 * @param int|string $form_id   Form to import into.
+	 * @param array      $field_ids Field ids, indexed by their column position.
+	 * @param int|string $entry_key Unused, kept for the existing signature.
+	 * @param int        $start_row Row to start this batch at.
+	 * @param string     $del       Column delimiter.
+	 * @param int        $max       How many rows to import in this batch.
+	 *
+	 * @return int The last row imported.
 	 */
-	private static function check_field_for_section_id( $field ) {
-		if ( self::is_the_child_of_a_repeater( $field ) ) {
-			return $field->field_options['in_section'];
-		}
-
-		$form_id = FrmAppHelper::get_post_param( 'form_id', 0, 'absint' );
-
-		if ( $form_id && self::field_is_embedded( $field ) ) {
-			return self::get_section_id_from_form_fields( $form_id, $field->form_id );
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param object $field
-	 *
-	 * @return bool
-	 */
-	private static function field_is_embedded( $field ) {
-		return isset( $_POST['form_id'] ) && $field->form_id !== $_POST['form_id'];
-	}
-
-	private static function get_section_id_from_form_fields( $parent_form_id, $embedded_form_id ) {
-		$fields = FrmField::get_all_types_in_form( $parent_form_id, 'form' );
-
-		foreach ( $fields as $parent_form_field ) {
-			if ( ! empty( $parent_form_field->field_options['form_select'] ) && (int) $parent_form_field->field_options['form_select'] === (int) $embedded_form_id ) {
-				return $parent_form_field->id;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param object $field
-	 *
-	 * @return bool
-	 */
-	private static function is_the_child_of_a_repeater( $field ) {
-		$form_id = FrmAppHelper::get_post_param( 'form_id', false, 'absint' );
-
-		if ( (int) $field->form_id === $form_id || empty( $field->field_options['in_section'] ) ) {
-			return false;
-		}
-
-		$section_id = $field->field_options['in_section'];
-		$section    = self::get_field( $section_id );
-
-		return $section ? FrmField::is_repeating_field( $section ) : false;
-	}
-
-	/**
-	 * Update section data when importing, for populating repeater fields.
-	 *
-	 * @param int          $section_id
-	 * @param int          $form_id
-	 * @param int          $field_id
-	 * @param array|string $value
-	 * @param array        $values
-	 */
-	private static function set_section_field_value( $section_id, $form_id, $field_id, $value, &$values ) {
-		if ( self::$legacy_import_format ) {
-			$section_data = self::get_new_section_data_for_legacy_format( $section_id, $form_id, $field_id, $value );
-		} else {
-			$section_data = self::get_new_section_data_for_multiple_row_format( $section_id, $form_id, $field_id, $value );
-		}
-		$values['item_meta'][ $section_id ] = $section_data;
-		$_POST['item_meta'][ $section_id ]  = $section_data;
-		unset( $values['item_meta'][ $field_id ] );
-	}
-
-	/**
-	 * Get the new section data for legacy single-row format.
-	 *
-	 * @param int          $section_id
-	 * @param int          $form_id
-	 * @param int          $field_id
-	 * @param array|string $value
-	 */
-	private static function get_new_section_data_for_legacy_format( $section_id, $form_id, $field_id, $value ) {
-		$value     = array_map( 'trim', explode( ',', $value ) );
-		$item_meta = FrmAppHelper::get_post_param( 'item_meta', array() );
-
-		foreach ( $value as $index => $current ) {
-			$section_data = isset( $item_meta[ $section_id ] ) ? (array) $item_meta[ $section_id ] : array( 'form' => $form_id );
-
-			foreach ( $value as $index => $current ) {
-				if ( ! isset( $section_data[ $index ] ) ) {
-					$section_data[ $index ] = array();
-				}
-				$section_data[ $index ][ $field_id ] = $current;
-			}
-		}
-
-		return $section_data;
-	}
-
-	/**
-	 * Get the new section data for current multiple row format.
-	 *
-	 * @param int          $section_id
-	 * @param int          $form_id
-	 * @param int          $field_id
-	 * @param array|string $value
-	 *
-	 * @return array
-	 */
-	private static function get_new_section_data_for_multiple_row_format( $section_id, $form_id, $field_id, $value ) {
-		$item_meta = FrmAppHelper::get_post_param( 'item_meta', array() );
-
-		if ( ! isset( $item_meta[ $section_id ] ) ) {
-			return array(
-				'form' => $form_id,
-				array( $field_id => $value ),
-			);
-		}
-
-		$section_data = $item_meta[ $section_id ];
-		$index        = 0;
-
-		while ( true ) {
-			if ( ! array_key_exists( $index, $section_data ) ) {
-				$section_data[ $index ] = array();
-				break;
-			}
-
-			if ( ! array_key_exists( $field_id, $section_data[ $index ] ) ) {
-				break;
-			}
-
-			++$index;
-		}
-
-		$section_data[ $index ][ $field_id ] = $value;
-		return $section_data;
-	}
-
-	/**
-	 * Called by self::csv_to_entry_value
-	 *
-	 * @param int   $key
-	 * @param array $field_id
-	 * @param array $data
-	 * @param array $values
-	 *
-	 * @return void
-	 */
-	private static function set_values_for_data_fields( $key, $field_id, $data, &$values ) {
-		$field_type = $field_id['type'] ?? false;
-
-		if ( $field_type !== 'data' ) {
-			return;
-		}
-
-		$linked   = $field_id['linked'] ?? false;
-		$field_id = $field_id['field_id'];
-
-		if ( $linked ) {
-			$entry_id = FrmDb::get_var(
-				'frm_item_metas',
-				array(
-					'meta_value' => $data[ $key ],
-					'field_id'   => $linked,
-				),
-				'item_id'
-			);
-		} else {
-			// get entry id of entry with item_key == $data[$key]
-			$entry_id = FrmDb::get_var( 'frm_items', array( 'item_key' => $data[ $key ] ) );
-		}
-
-		if ( $entry_id ) {
-			$values['item_meta'][ $field_id ] = $entry_id;
-		}
+	public static function import_csv( $path, $form_id, $field_ids, $entry_key = 0, $start_row = 2, $del = ',', $max = 250 ) {
+		return FrmProCSVImportHelper::import_csv( $path, $form_id, $field_ids, $entry_key, $start_row, $del, $max );
 	}
 
 	/**
@@ -724,211 +273,44 @@ class FrmProXMLHelper {
 	 *
 	 * @return void
 	 */
-	private static function convert_field_values( $field, $field_id, &$metas, $saved_entries = array() ) {
-		$field_obj          = FrmFieldFactory::get_field_object( $field );
-		$metas[ $field_id ] = $field_obj->get_import_value( $metas[ $field_id ], array( 'ids' => $saved_entries ) );
-	}
+	public static function convert_field_values( $field, $field_id, &$metas, $saved_entries = array() ) {
+		$field_obj   = FrmFieldFactory::get_field_object( $field );
+		$atts        = array( 'ids' => $saved_entries );
+		$date_format = FrmProCSVImportHelper::get_date_format( $field_id );
 
-	/**
-	 * Convert timestamps to the database format
-	 *
-	 * @param array $values
-	 */
-	private static function convert_timestamps( &$values ) {
-		$offset          = get_option( 'gmt_offset' ) * 60 * 60;
-		$frmpro_settings = FrmProAppHelper::get_settings();
-
-		foreach ( array( 'created_at', 'updated_at' ) as $stamp ) {
-			if ( ! isset( $values[ $stamp ] ) ) {
-				continue;
-			}
-
-			// Adjust the date format if it starts with the day
-			if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}/', trim( $values[ $stamp ] ) ) && str_starts_with( $frmpro_settings->date_format, 'd' ) ) {
-				$reg_ex = str_replace(
-					array( '/', '.', '-', 'd', 'j', 'm', 'y', 'Y' ),
-					array( '\/', '\.', '\-', '\d{2}', '\d', '\d{2}', '\d{2}', '\d{4}' ),
-					$frmpro_settings->date_format
-				);
-
-				if ( preg_match( '/^' . $reg_ex . '/', trim( $values[ $stamp ] ) ) ) {
-					$values[ $stamp ] = FrmProAppHelper::convert_date( $values[ $stamp ], $frmpro_settings->date_format, 'Y-m-d H:i:s' );
-				}
-			}
-
-			$values[ $stamp ] = gmdate( 'Y-m-d H:i:s', strtotime( $values[ $stamp ] ) - $offset );
-
-			unset( $stamp );
+		if ( $date_format ) {
+			$atts['date_format'] = $date_format;
 		}
+
+		$metas[ $field_id ] = $field_obj->get_import_value( $metas[ $field_id ], $atts );
+
+		self::drop_unreadable_date( $field, $metas[ $field_id ] );
 	}
 
 	/**
-	 * Make sure values are in the format they should be saved in
+	 * Empties a date that could not be read.
 	 *
-	 * @param array $values
+	 * An import writes entries without validating them, so a date the field
+	 * handed back untouched, because no format could read it, would be stored in
+	 * a date column as it arrived. Leaving it empty keeps the column holding
+	 * dates, and an empty cell reads as missing rather than as some other day,
+	 * which is what 1970-01-01 used to look like.
+	 *
+	 * @since 6.35
+	 *
+	 * @param stdClass $field Field the value belongs to.
+	 * @param mixed    $value Value returned by the field, emptied in place.
 	 *
 	 * @return void
 	 */
-	private static function convert_db_cols( &$values ) {
-		if ( empty( $values['item_key'] ) ) {
-			global $wpdb;
-			$values['item_key'] = FrmAppHelper::get_unique_key( '', $wpdb->prefix . 'frm_items', 'item_key' );
+	private static function drop_unreadable_date( $field, &$value ) {
+		if ( 'date' !== $field->type || ! is_string( $value ) || '' === $value ) {
+			return;
 		}
 
-		if ( isset( $values['user_id'] ) ) {
-			$values['user_id'] = FrmAppHelper::get_user_id_param( $values['user_id'] );
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			$value = '';
 		}
-
-		if ( isset( $values['updated_by'] ) ) {
-			$values['updated_by'] = FrmAppHelper::get_user_id_param( $values['updated_by'] );
-		}
-
-		if ( isset( $values['is_draft'] ) ) {
-			$values['is_draft'] = (int) $values['is_draft'];
-		}
-
-		if ( isset( $values['ip'] ) ) {
-			$values['ip'] = sanitize_text_field( $values['ip'] );
-		}
-	}
-
-	/**
-	 * Save the entry after checking if it should be created or updated
-	 *
-	 * @param array $values
-	 * @param array $comments
-	 */
-	private static function save_or_edit_entry( $values, $comments ) {
-		$entry_id = self::get_entry_to_edit( $values );
-
-		if ( $entry_id ) {
-			FrmEntry::update( $entry_id, $values );
-		} else {
-			$entry_id = FrmEntry::create( $values );
-		}
-
-		self::import_entry_comments_from_csv( $entry_id, $comments );
-	}
-
-	/**
-	 * @since 6.12
-	 *
-	 * @param int   $entry_id
-	 * @param array $comments
-	 *
-	 * @return void
-	 */
-	private static function import_entry_comments_from_csv( $entry_id, $comments ) {
-		$comment_strings = self::get_comment_strings();
-		global $wpdb;
-
-		foreach ( $comments[ $comment_strings['comment'] ] as $key => $comment ) {
-			$user       = get_user_by( 'login', $comments[ $comment_strings['comment_user'] ][ $key ] );
-			$user_id    = $user ? $user->ID : '';
-			$meta_value = array(
-				'comment' => $comment,
-				'user_id' => $user_id,
-			);
-
-			$values = array(
-				'meta_value' => serialize( array_filter( $meta_value, 'FrmAppHelper::is_not_empty_value' ) ),
-				'item_id'    => $entry_id,
-				'field_id'   => 0,
-				'created_at' => get_gmt_from_date( $comments[ $comment_strings['comment_date'] ][ $key ] ),
-			);
-
-			$wpdb->insert( $wpdb->prefix . 'frm_item_metas', $values );
-		}
-	}
-
-	/**
-	 * @since 6.12
-	 *
-	 * @return array
-	 */
-	private static function get_comment_strings() {
-		return array(
-			'comment'      => __( 'Comment', 'formidable' ),
-			'comment_user' => __( 'Comment User', 'formidable' ),
-			'comment_date' => __( 'Comment Date', 'formidable' ),
-		);
-	}
-
-	/**
-	 * Returns an array from a given row values.
-	 *
-	 * @since 6.12
-	 *
-	 * @param int   $row     Row index
-	 * @param array $data    The entry values
-	 * @param array $headers The csv column headers
-	 *
-	 * @return array
-	 */
-	private static function get_comments_from_row( $row, $data, $headers ) {
-		$comment_strings = self::get_comment_strings();
-
-		$comments = array(
-			$comment_strings['comment']      => array(),
-			$comment_strings['comment_user'] => array(),
-			$comment_strings['comment_date'] => array(),
-		);
-
-		if ( $row <= 1 ) {
-			return $comments;
-		}
-
-		foreach ( $data as $key => $col ) {
-			if ( in_array( $headers[ $key ], array( $comment_strings['comment'], $comment_strings['comment_user'], $comment_strings['comment_date'] ), true ) ) {
-				$comments[ $headers[ $key ] ][] = $col;
-			}
-		}
-
-		return $comments;
-	}
-
-	/**
-	 * Editing CSV entries on import based on id or key
-	 *
-	 * @since 3.01.03
-	 *
-	 * @param array $values
-	 *
-	 * @return int
-	 */
-	private static function get_entry_to_edit( $values ) {
-		$entry_id = 0;
-		$query    = array();
-
-		if ( ! empty( $values['id'] ) ) {
-			$query['id'] = $values['id'];
-		}
-
-		if ( ! empty( $values['item_key'] ) ) {
-			$query['item_key'] = $values['item_key'];
-		}
-
-		if ( $query ) {
-			if ( count( $query ) === 2 ) {
-				$query = array_merge( array( 'or' => 1 ), $query );
-			}
-
-			$query    = array(
-				'form_id' => $values['form_id'],
-				$query,
-			);
-			$entry_id = FrmDb::get_var( 'frm_items', $query );
-		}
-
-		/**
-		 * When importing entries via CSV set the id of the entry that should be edited
-		 *
-		 * @since 3.01.03
-		 *
-		 * @param int $entry_id - The ID of the entry to edit. 0 means a new entry will be created.
-		 * @param array $values - The mapped values for this entry
-		 */
-		return (int) apply_filters( 'frm_editing_entry_by_csv', absint( $entry_id ), $values );
 	}
 
 	/**
@@ -1042,13 +424,14 @@ class FrmProXMLHelper {
 	/**
 	 * Perform an action after a field is imported.
 	 *
-	 * Builds a map of original field ids to their new ids and remembers any lookup field that watches
-	 * other fields. The watch_lookup ids are switched to the new ids later in after_import_form(), once
-	 * every field in the form has an id. This avoids losing the value when a lookup field is imported
-	 * before the field it watches.
+	 * Builds a map of original field ids to their new ids and remembers the original value of every
+	 * setting that stores another field's id. Those settings are switched to the new ids later in
+	 * switch_field_ids_after_import(), once every field in every imported form has an id. This avoids
+	 * losing the value when a field is imported before the field it points at.
 	 *
 	 * @since 2.0.25
 	 * @since 6.34    Added the $old_field_id param so existing fields updated on import are mapped too.
+	 * @since 6.35     Records every setting in the FrmProField::field_id_settings() registry, not just watch_lookup.
 	 *
 	 * @param array $field_array
 	 * @param int   $field_id
@@ -1065,8 +448,77 @@ class FrmProXMLHelper {
 
 		self::$xml_import_fields_data['fields_id_map'][ $old_field_id ] = $field_id;
 
-		if ( ! empty( $field_array['field_options']['watch_lookup'] ) ) {
-			self::$xml_import_fields_data['imported_fields_with_lookup'][ $field_array['form_id'] ][ $field_id ] = (array) $field_array['field_options']['watch_lookup'];
+		$field_type   = $field_array['type'] ?? '';
+		$id_settings  = FrmProField::field_id_settings( $field_type );
+		$original_ids = array();
+
+		foreach ( $id_settings as $setting => $shape ) {
+			if ( empty( $field_array['field_options'][ $setting ] ) ) {
+				continue;
+			}
+
+			$original_ids[ $setting ] = $field_array['field_options'][ $setting ];
+		}
+
+		if ( $original_ids ) {
+			self::$xml_import_fields_data['imported_fields_with_field_ids'][ $field_id ] = $original_ids;
+		}
+	}
+
+	/**
+	 * Switch every imported field setting that stores another field's id to the new field ids.
+	 *
+	 * Runs once every form in the file has been imported, so it resolves a reference to a field in
+	 * the same form and to a field in a form imported later. A setting where no id could be resolved
+	 * is left as it is in the database, so a fix-up made elsewhere during the import is not undone.
+	 *
+	 * @since 6.35
+	 *
+	 * @return void
+	 */
+	public static function switch_field_ids_after_import() {
+		$imported_fields = self::$xml_import_fields_data['imported_fields_with_field_ids'];
+
+		if ( ! $imported_fields ) {
+			return;
+		}
+
+		$fields_id_map = array_map( 'intval', self::$xml_import_fields_data['fields_id_map'] );
+		$new_fields    = FrmDb::get_results( 'frm_fields', array( 'id' => array_keys( $imported_fields ) ), 'id,type,field_options' );
+
+		foreach ( (array) $new_fields as $new_field ) {
+			$field_options = $new_field->field_options;
+			FrmAppHelper::unserialize_or_decode( $field_options );
+
+			if ( ! is_array( $field_options ) ) {
+				continue;
+			}
+
+			$id_settings  = FrmProField::field_id_settings( $new_field->type );
+			$original_ids = $imported_fields[ (int) $new_field->id ];
+			$updated      = false;
+
+			foreach ( $original_ids as $setting => $original_value ) {
+				if ( ! isset( $id_settings[ $setting ] ) ) {
+					continue;
+				}
+
+				$changed   = false;
+				$new_value = FrmProField::switch_ids_in_setting_value( $original_value, $id_settings[ $setting ], $fields_id_map, $changed );
+
+				if ( ! $changed ) {
+					// Nothing resolved, so leave the value in the database alone. Another import
+					// fix-up may have already corrected it, as happens for a repeater's in_section.
+					continue;
+				}
+
+				$field_options[ $setting ] = $new_value;
+				$updated                   = true;
+			}
+
+			if ( $updated ) {
+				FrmField::update( $new_field->id, array( 'field_options' => $field_options ) );
+			}
 		}
 	}
 
@@ -1074,62 +526,86 @@ class FrmProXMLHelper {
 	 * Switch the watch_lookup ids of imported lookup fields to the ids of the newly imported fields.
 	 *
 	 * @since 6.34
+	 * @since 6.35  Switches every setting that stores a field id, for every imported form. The
+	 *             $form_id param is no longer used, since the switch is no longer scoped to one form.
 	 *
-	 * @param int $form_id
+	 * @param int $form_id Id of the form that was just imported.
 	 *
 	 * @return void
 	 */
-	public static function after_import_form( $form_id ) {
-		$lookup_fields = self::$xml_import_fields_data['imported_fields_with_lookup'][ $form_id ] ?? array();
-
-		if ( ! $lookup_fields ) {
-			return;
-		}
-
-		$fields_id_map = array_map( 'intval', self::$xml_import_fields_data['fields_id_map'] );
-		$new_fields    = FrmDb::get_results( 'frm_fields', array( 'id' => array_keys( $lookup_fields ) ), 'id,field_options' );
-		$options_by_id = array();
-
-		foreach ( (array) $new_fields as $new_field ) {
-			$field_options = $new_field->field_options;
-			FrmAppHelper::unserialize_or_decode( $field_options );
-			$options_by_id[ (int) $new_field->id ] = $field_options;
-		}
-
-		foreach ( $lookup_fields as $new_field_id => $old_watch_lookup ) {
-			if ( ! isset( $options_by_id[ $new_field_id ] ) ) {
-				continue;
-			}
-
-			$field_options                 = $options_by_id[ $new_field_id ];
-			$field_options['watch_lookup'] = self::switch_watch_lookup_ids( $old_watch_lookup, $fields_id_map );
-
-			FrmField::update( $new_field_id, array( 'field_options' => $field_options ) );
-		}
-
-		unset( self::$xml_import_fields_data['imported_fields_with_lookup'][ $form_id ] );
+	public static function after_import_form( $form_id = 0 ) {
+		self::switch_field_ids_after_import();
 	}
 
 	/**
-	 * Switch a set of watch_lookup ids to the new field ids using the imported ids map.
+	 * Switch the form ids stored in field settings that point at a form imported later.
 	 *
-	 * @since 6.34
+	 * FrmXMLHelper::maybe_update_form_select() and maybe_update_get_values_form_setting() run while
+	 * each field is created, so they cannot resolve a form that has not been imported yet. Child
+	 * forms are imported first, which covers a repeating section, but an embedded form and a Dynamic
+	 * or Lookup source form can appear anywhere in the file. Once every form has an id, a reference
+	 * still holding an old id can be switched.
 	 *
-	 * @param array $watch_lookup  Original watch_lookup ids.
-	 * @param array $fields_id_map Map of original field ids to their new ids.
+	 * @since 6.35
 	 *
-	 * @return array
+	 * @param array $imported Summary of imported items, including 'forms' => array( old_form_id => new_form_id ).
+	 *
+	 * @return void
 	 */
-	private static function switch_watch_lookup_ids( $watch_lookup, $fields_id_map ) {
-		$new_watch_lookup = array();
-
-		foreach ( (array) $watch_lookup as $key => $old_id ) {
-			if ( ! empty( $fields_id_map[ $old_id ] ) ) {
-				$new_watch_lookup[ $key ] = (int) $fields_id_map[ $old_id ];
-			}
+	public static function switch_form_ids_after_import( $imported ) {
+		if ( empty( $imported['forms'] ) ) {
+			return;
 		}
 
-		return $new_watch_lookup;
+		$new_form_ids = array_map( 'intval', array_values( $imported['forms'] ) );
+
+		foreach ( array( 'form_select', 'get_values_form' ) as $setting ) {
+			$fields = FrmField::getAll(
+				array(
+					'fi.form_id'            => $new_form_ids,
+					'fi.field_options like' => '"' . $setting . '"',
+				),
+				'field_order'
+			);
+
+			foreach ( $fields as $field ) {
+				if ( 'form_select' === $setting && ! self::form_select_holds_a_form_id( $field ) ) {
+					// On a Dynamic field form_select holds a field id, which the field id registry covers.
+					continue;
+				}
+
+				$old_form_id = $field->field_options[ $setting ] ?? 0;
+
+				if ( ! $old_form_id || ! is_numeric( $old_form_id ) ) {
+					continue;
+				}
+
+				// Skip a value that is already one of the newly imported form ids, so an id that was
+				// switched already is not switched a second time.
+				if ( in_array( (int) $old_form_id, $new_form_ids, true ) || ! isset( $imported['forms'][ $old_form_id ] ) ) {
+					continue;
+				}
+
+				$field->field_options[ $setting ] = $imported['forms'][ $old_form_id ];
+
+				FrmField::update( $field->id, array( 'field_options' => $field->field_options ) );
+			}
+		}
+	}
+
+	/**
+	 * @since 6.35
+	 *
+	 * @param stdClass $field
+	 *
+	 * @return bool True when the field's form_select setting holds a form id rather than a field id.
+	 */
+	private static function form_select_holds_a_form_id( $field ) {
+		if ( 'form' === $field->type ) {
+			return true;
+		}
+
+		return 'divider' === $field->type && FrmField::is_option_true( $field->field_options, 'repeat' );
 	}
 
 	/**
@@ -1143,8 +619,8 @@ class FrmProXMLHelper {
 	 */
 	public static function reset_xml_import_fields_data() {
 		self::$xml_import_fields_data = array(
-			'fields_id_map'               => array(),
-			'imported_fields_with_lookup' => array(),
+			'fields_id_map'                  => array(),
+			'imported_fields_with_field_ids' => array(),
 		);
 	}
 

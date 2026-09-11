@@ -63,7 +63,7 @@ body.rtl .frm-entry-navigation {
 
 .frm-entry-navigation .frm-entry-link:hover {
 	color: var(--primary-color);
-	background-color: var(--light-blue);
+	background-color: var(--primary-25);
 }
 
 .frm-entry-navigation .frm-entry-link.frm-disabled {

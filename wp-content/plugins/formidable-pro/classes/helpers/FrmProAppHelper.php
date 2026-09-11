@@ -1303,11 +1303,26 @@ class FrmProAppHelper {
 
 	/**
 	 * @since 5.0.13
+	 * @since 6.35 Serves jQuery UI from cdnjs rather than Google Hosted Libraries.
 	 *
-	 * @return string The base Google APIS url for the current version of jQuery UI.
+	 * @return string The base CDN url for the current version of jQuery UI.
 	 */
 	public static function jquery_ui_base_url() {
-		$url = 'http' . ( is_ssl() ? 's' : '' ) . '://ajax.googleapis.com/ajax/libs/jqueryui/' . FrmAppHelper::script_version( 'jquery-ui-core', '1.13.2' );
+		// Google Hosted Libraries is a mirror rather than the jQuery project, and it stopped at
+		// 1.14.1. WordPress 7.1 registers jQuery UI 1.14.2, so every theme stylesheet built from
+		// the registered version returned a 404 and the datepicker loaded with no CSS at all.
+		// cdnjs carries every release WordPress has shipped, so the registered version stays
+		// correct here instead of needing a pin that goes stale on the next jQuery UI bump.
+		$url = 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/' . FrmAppHelper::script_version( 'jquery-ui-core', '1.13.2' );
+
+		/**
+		 * Filters the CDN url jQuery UI theme stylesheets and i18n scripts are loaded from.
+		 *
+		 * The version is the final path segment, and the API add on rewrites it to 1.11.4 to reach
+		 * the combined i18n file, so a replacement host has to keep the same path shape.
+		 *
+		 * @param string $url The base url, without a trailing slash.
+		 */
 		return apply_filters( 'frm_jquery_ui_base_url', $url );
 	}
 

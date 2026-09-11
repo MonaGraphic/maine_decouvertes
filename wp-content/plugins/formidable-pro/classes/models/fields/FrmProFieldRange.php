@@ -150,7 +150,8 @@ class FrmProFieldRange extends FrmFieldType {
 		if ( 'hidden' === $type ) {
 			$input .= FrmAppHelper::array_to_html_params( $this->get_gap_data_atts() ) . ' />';
 		} else {
-			$input .= 'min="' . esc_attr( $min ) . '" max="' . esc_attr( $max ) . '" />';
+			$input .= 'min="' . esc_attr( $min ) . '" max="' . esc_attr( $max ) . '"';
+			$input .= $this->get_style_for_default_value( $default_value, $min, $max ) . ' />';
 		}
 
 		if ( ! $is_range_slider ) {
@@ -174,13 +175,20 @@ class FrmProFieldRange extends FrmFieldType {
 		$max_gap = FrmField::get_option( $this->field, 'maxgap' );
 		$min_gap = $min_gap ? $min_gap : self::DEFAULT_MIN_GAP;
 
+		$min  = FrmField::get_option( $this->field, 'minnum' );
+		$max  = FrmField::get_option( $this->field, 'maxnum' );
+		$min  = $min ? $min : self::DEFAULT_MIN;
+		$max  = $max ? $max : self::DEFAULT_MAX;
+		$span = $max - $min;
+
 		if ( ! $max_gap ) {
-			$min     = FrmField::get_option( $this->field, 'minnum' );
-			$max     = FrmField::get_option( $this->field, 'maxnum' );
-			$min     = $min ? $min : self::DEFAULT_MIN;
-			$max     = $max ? $max : self::DEFAULT_MAX;
-			$max_gap = $max - $min;
+			$max_gap = $span;
 		}
+
+		// Gaps wider than the min/max span can be saved (the builder only
+		// warns), but the front-end slider rejects them. Clamp for display.
+		$min_gap = min( $min_gap, $span );
+		$max_gap = min( max( $max_gap, $min_gap ), $span );
 
 		return array(
 			'data-min-gap' => $min_gap,
@@ -198,13 +206,200 @@ class FrmProFieldRange extends FrmFieldType {
 	 */
 	private function get_default_value( $min, $max ) {
 		$default_value = $this->get_field_column( 'default_value' );
-		$out_of_range  = $default_value < $min || $default_value > $max;
+
+		if ( FrmField::get_option( $this->field, 'is_range_slider' ) ) {
+			return self::get_range_slider_default_value( $default_value, $min, $max );
+		}
+
+		$out_of_range = $default_value < $min || $default_value > $max;
 
 		if ( $default_value !== '' && $out_of_range ) {
 			return '';
 		}
 
 		return $default_value;
+	}
+
+	/**
+	 * Reset a range slider default value if either half is out of range.
+	 *
+	 * A range slider stores both handles in one column, so the pair has to be checked a half at a
+	 * time. Comparing the whole "20,40" string against the min and max compares it as a string and
+	 * reports a perfectly valid default as out of range.
+	 *
+	 * @since 6.35
+	 *
+	 * @param mixed $default_value The stored default value.
+	 * @param mixed $min           The Min Value setting.
+	 * @param mixed $max           The Max Value setting.
+	 *
+	 * @return string
+	 */
+	private static function get_range_slider_default_value( $default_value, $min, $max ) {
+		if ( ! is_string( $default_value ) || '' === $default_value ) {
+			return '';
+		}
+
+		$limits = FrmProRangeSliderHelper::get_numeric_range_limits( $min, $max );
+		$min    = $limits[0];
+		$max    = $limits[1];
+
+		foreach ( self::split_default_value( $default_value ) as $value ) {
+			if ( ! is_numeric( $value ) ) {
+				// A shortcode such as [25] resolves at render time, so there is nothing to range
+				// check here. Keep it rather than throwing the whole default away.
+				continue;
+			}
+
+			if ( (float) $value < $min || (float) $value > $max ) {
+				return '';
+			}
+		}
+
+		return $default_value;
+	}
+
+	/**
+	 * Check whether either half of a default value holds something other than a number.
+	 *
+	 * A shortcode only resolves at render time, so until it does the form builder has no position
+	 * to place a handle at. An empty half is not a shortcode: the slider fills that side in from
+	 * its own range.
+	 *
+	 * @since 6.35
+	 *
+	 * @param mixed $default_value The default value, already shortcode processed on the front end.
+	 *
+	 * @return bool
+	 */
+	private static function default_value_has_shortcode( $default_value ) {
+		if ( ! is_string( $default_value ) || '' === $default_value ) {
+			return false;
+		}
+
+		foreach ( self::split_default_value( $default_value ) as $value ) {
+			if ( '' !== $value && ! is_numeric( $value ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Split a stored range slider default value into its start and end halves.
+	 *
+	 * Both handles share the default_value column, joined with a comma. The split stops after the
+	 * first comma so that a value carrying one of its own never loses its tail.
+	 *
+	 * @since 6.35
+	 *
+	 * @param mixed $default_value The stored default value.
+	 *
+	 * @return array The start value at index 0 and the end value at index 1.
+	 */
+	public static function split_default_value( $default_value ) {
+		if ( ! is_string( $default_value ) || '' === $default_value ) {
+			return array( '', '' );
+		}
+
+		$values = explode( ',', $default_value, 2 );
+
+		return array( trim( $values[0] ), isset( $values[1] ) ? trim( $values[1] ) : '' );
+	}
+
+	/**
+	 * Join a Start Value and an End Value back into the single stored default value.
+	 *
+	 * An empty End Value stores the start on its own rather than leaving a trailing comma. Defaults
+	 * written before this setting was split are single shortcodes with no comma, so re-saving one
+	 * has to give the column back exactly what it held. Anything the shortcode resolves to that
+	 * carries its own comma is separated later, once it has a value.
+	 *
+	 * @since 6.35
+	 *
+	 * @param string|null $start The Start Value setting. Null when only the other half was posted.
+	 * @param string|null $end   The End Value setting. Null when only the other half was posted.
+	 *
+	 * @return string
+	 */
+	public static function join_default_value( $start, $end ) {
+		$start = is_string( $start ) ? trim( $start ) : '';
+		$end   = is_string( $end ) ? trim( $end ) : '';
+
+		return '' === $end ? $start : $start . ',' . $end;
+	}
+
+	/**
+	 * Join the posted Start Value and End Value into the single default_value column.
+	 *
+	 * The pair is also range checked here, so a default outside the slider's Min Value and Max
+	 * Value settings cannot be stored.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $values   The field values about to be saved.
+	 * @param int   $field_id The field ID.
+	 *
+	 * @return array
+	 */
+	public static function clean_field_options_before_update( $values, $field_id ) {
+		// Pass an empty sanitize callback so that an absent setting stays null. get_simple_request
+		// sanitizes the fallback as well, and sanitize_text_field turns null into an empty string,
+		// which would read as a deliberately cleared value.
+		$start = FrmAppHelper::get_post_param( 'default_value_start_' . $field_id, null, '' );
+		$end   = FrmAppHelper::get_post_param( 'default_value_end_' . $field_id, null, '' );
+
+		if ( null !== $start || null !== $end ) {
+			FrmAppHelper::sanitize_value( 'sanitize_text_field', $start );
+			FrmAppHelper::sanitize_value( 'sanitize_text_field', $end );
+
+			$values['default_value'] = self::join_default_value( $start, $end );
+		}
+
+		// The split settings are absent for an import or an API call, so the default value still
+		// has to be range checked here rather than only on the way in from the form builder.
+		return FrmProRangeSliderHelper::clamp_default_value_to_range( $values, $field_id );
+	}
+
+	/**
+	 * Show the Default Value setting as separate Start Value and End Value inputs for a range slider.
+	 *
+	 * A single handle slider keeps the one Default Value box it has always had.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array  $field               Field data including 'id', 'default_value', 'dyn_default_value'.
+	 * @param object $field_obj           Field type handler.
+	 * @param array  $default_value_types Default value types available for this field.
+	 * @param array  $display             Display options; may include 'default_value'.
+	 *
+	 * @return void
+	 */
+	public function show_default_value_setting( $field, $field_obj, $default_value_types, $display ) {
+		if ( empty( $field['is_range_slider'] ) || ! empty( $display['default_value'] ) ) {
+			parent::show_default_value_setting( $field, $field_obj, $default_value_types, $display );
+			return;
+		}
+
+		$values = self::split_default_value( $field['default_value'] );
+
+		// Text inputs rather than number inputs, so a default can be a shortcode such as [25] or
+		// [get param=low] instead of a literal number.
+		$start_atts = array(
+			'type'  => 'text',
+			'id'    => 'frm_default_value_start_' . $field['field_key'],
+			'name'  => 'default_value_start_' . $field['id'],
+			'value' => $values[0],
+		);
+		$end_atts   = array(
+			'type'  => 'text',
+			'id'    => 'frm_default_value_end_' . $field['field_key'],
+			'name'  => 'default_value_end_' . $field['id'],
+			'value' => $values[1],
+		);
+
+		include FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/default-range-value.php';
 	}
 
 	protected function extra_field_opts() {
@@ -284,6 +479,45 @@ class FrmProFieldRange extends FrmFieldType {
 	}
 
 	/**
+	 * Returns inline CSS for showing the default value, particularly helpful when JS is disabled.
+	 *
+	 * @since 6.35
+	 *
+	 * @param int|string $default_value
+	 * @param false|int  $min
+	 * @param false|int  $max
+	 *
+	 * @return string
+	 */
+	private function get_style_for_default_value( $default_value, $min = false, $max = false ) {
+		// A default of 0 is a real value, so test for a filled in setting rather than truthiness.
+		if ( ! is_numeric( $default_value ) ) {
+			return '';
+		}
+
+		$is_field_object = is_object( $this->field );
+
+		if ( false === $min ) {
+			$min = $is_field_object ? FrmField::get_option( $this->field, 'minnum' ) : self::DEFAULT_MIN;
+		}
+
+		if ( false === $max ) {
+			$max = $is_field_object ? FrmField::get_option( $this->field, 'maxnum' ) : self::DEFAULT_MAX;
+		}
+
+		$min = is_numeric( $min ) ? (float) $min : (float) self::DEFAULT_MIN;
+		$max = is_numeric( $max ) ? (float) $max : (float) self::DEFAULT_MAX;
+
+		if ( $min === $max ) {
+			return '';
+		}
+
+		$progress_percent = ( (float) $default_value - $min ) / ( $max - $min ) * 100;
+		$progress_percent = min( 100, max( 0, $progress_percent ) );
+		return 'style="background: linear-gradient(to right, var(--slider-color) 0%, var(--slider-color) ' . esc_attr( $progress_percent ) . '%, var(--slider-bar-color) ' . esc_attr( $progress_percent ) . '% 100%)"';
+	}
+
+	/**
 	 * Returns the unformatted value.
 	 *
 	 * @since 6.29
@@ -355,28 +589,58 @@ class FrmProFieldRange extends FrmFieldType {
 	/**
 	 * @since 6.23
 	 *
+	 * @param string $default The default value, used when the field has no value of its own.
+	 *
 	 * @return string
 	 */
-	private function get_range_slider_html() {
+	private function get_range_slider_html( $default = '' ) {
 		$min_value = FrmField::get_option( $this->field, 'minnum' );
 		$min_value = floatval( $min_value ? $min_value : self::DEFAULT_MIN );
 		$max_value = FrmField::get_option( $this->field, 'maxnum' );
 		$max_value = floatval( $max_value ? $max_value : self::DEFAULT_MAX );
 		$max_gap   = FrmField::get_option( $this->field, 'maxgap' );
 		$max_gap   = floatval( $max_gap ? $max_gap : $max_value - $min_value );
-		$max_pos   = $max_gap / ( $max_value - $min_value ) * 100;
-		$max_value = $min_value + $max_gap;
-		$min_value = $this->format_min_max_value( $min_value );
-		$max_value = $this->format_min_max_value( $max_value );
+		// A saved gap wider than the min/max span would render the handle past the track.
+		$max_gap = min( $max_gap, $max_value - $min_value );
 
-		$value_html = $this->get_range_slider_value_html( $min_value, $max_value );
+		// Position the handles from the current value (e.g. when editing an
+		// entry) so the slider is correct on load, before the JS syncs it.
+		// This mirrors the initialization math in initializeRangeSlider().
+		$value = FrmField::get_option( $this->field, 'value' );
+
+		if ( '' === $value || false === $value || null === $value || array() === $value ) {
+			// The form builder has no entry value, so fall back to the Start Value and End Value
+			// settings. Without this the preview always sits at the full min/max span. A default
+			// still holding a shortcode has no position until it resolves, so ignore it here and
+			// let the slider's own range decide where the handles sit. By the time the front end
+			// gets here the shortcode has been processed, so anything it produced is used, and a
+			// comma it brought with it separates the two halves below.
+			$value = self::default_value_has_shortcode( $default ) ? '' : $default;
+		}
+
+		$values = is_array( $value ) ? array_values( $value ) : explode( ',', (string) $value );
+		$low    = isset( $values[0] ) && is_numeric( $values[0] ) ? floatval( $values[0] ) : $min_value;
+		$high   = isset( $values[1] ) && is_numeric( $values[1] ) ? floatval( $values[1] ) : $max_value;
+		$low    = max( $low, $min_value );
+		$high   = min( $high, $low + $max_gap, $max_value );
+
+		// An end value below the start value is not a supported range. Collapse the handles rather
+		// than swapping them, so the preview reads as no range at all instead of a valid looking
+		// one, and the filled section is never given a negative width.
+		$high = max( $high, $low );
+
+		$span    = $max_value - $min_value;
+		$min_pos = ( $low - $min_value ) / $span * 100;
+		$max_pos = ( $high - $min_value ) / $span * 100;
+
+		$value_html = $this->get_range_slider_value_html( $this->format_min_max_value( $low ), $this->format_min_max_value( $high ) );
 
 		$value_html  = $this->add_classes_to_displayed_value( $value_html );
 		$slider_html = '
 		<div class="frm-slider-wrapper">
 			<div class="frm-slider-track"></div>
-			<div class="frm-slider-range" style="left: 0%; width: ' . esc_attr( $max_pos ) . '%;"></div>
-			<div class="frm-slider-handle min-handle"></div>
+			<div class="frm-slider-range" style="left: ' . esc_attr( $min_pos ) . '%; width: ' . esc_attr( $max_pos - $min_pos ) . '%;"></div>
+			<div class="frm-slider-handle min-handle" style="left: ' . esc_attr( $min_pos ) . '%;"></div>
 			<div class="frm-slider-handle max-handle" style="right:' . esc_attr( 100 - $max_pos ) . '%;"></div>
 		</div>
 		';
@@ -426,7 +690,7 @@ class FrmProFieldRange extends FrmFieldType {
 	 */
 	private function output_selected_value( $default, $is_builder = false ) {
 		if ( FrmField::get_option( $this->field, 'is_range_slider' ) ) {
-			return $this->get_range_slider_html();
+			return $this->get_range_slider_html( $default );
 		}
 
 		$value = FrmField::get_option( $this->field, 'value' );

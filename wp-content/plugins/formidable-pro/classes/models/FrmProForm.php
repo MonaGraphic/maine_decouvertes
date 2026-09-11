@@ -543,7 +543,7 @@ class FrmProForm {
 		}
 
 		if ( $form_id ) {
-			self::maybe_fix_field_ids_after_duplicate( $form_id );
+			FrmProDuplicateFieldsHelper::maybe_fix_field_ids_after_duplicate( $form_id );
 		}
 
 		return $new_opts;
@@ -625,64 +625,6 @@ class FrmProForm {
 				FrmField::update( $field->id, array( 'field_options' => $field->field_options ) );
 			}
 		}
-	}
-
-	/**
-	 * Switch field ids that reference other fields for fields that were not already duplicated.
-	 *
-	 * Covers conditional logic (hide_field) and lookup watch fields (watch_lookup), both of which can
-	 * point at a field that comes later in the field order and is therefore duplicated afterwards.
-	 *
-	 * @param int $form_id the new duplicated form id.
-	 */
-	private static function maybe_fix_field_ids_after_duplicate( $form_id ) {
-		global $frm_unprocessed_duplicate_field_keys;
-
-		if ( ! $frm_unprocessed_duplicate_field_keys ) {
-			return;
-		}
-
-		$where  = array(
-			'fi.field_key' => $frm_unprocessed_duplicate_field_keys,
-			'fi.form_id'   => $form_id,
-		);
-		$fields = FrmField::getAll( $where, 'field_order' );
-
-		foreach ( $fields as $field ) {
-			$hide_field_updated   = self::switch_unprocessed_field_ids( $field->field_options, 'hide_field' );
-			$watch_lookup_updated = self::switch_unprocessed_field_ids( $field->field_options, 'watch_lookup' );
-
-			if ( $hide_field_updated || $watch_lookup_updated ) {
-				FrmField::update( $field->id, array( 'field_options' => $field->field_options ) );
-			}
-		}
-
-		$frm_unprocessed_duplicate_field_keys = array();
-	}
-
-	/**
-	 * Switch the field ids stored in a duplicated field option to their new ids.
-	 *
-	 * @param array  $field_options Field options, passed by reference.
-	 * @param string $setting       Option key holding an array of field ids, such as hide_field or watch_lookup.
-	 *
-	 * @return bool Whether any id was switched.
-	 */
-	private static function switch_unprocessed_field_ids( &$field_options, $setting ) {
-		global $frm_duplicate_ids;
-
-		if ( empty( $field_options[ $setting ] ) || ! is_array( $field_options[ $setting ] ) ) {
-			return false;
-		}
-
-		foreach ( $field_options[ $setting ] as $key => $field_id ) {
-			if ( isset( $frm_duplicate_ids[ $field_id ] ) ) {
-				$field_options[ $setting ][ $key ] = $frm_duplicate_ids[ $field_id ];
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

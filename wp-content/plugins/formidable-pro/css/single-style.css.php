@@ -12,6 +12,12 @@ if ( ! empty( $vars ) ) {
 if ( isset( $settings['progress_border_color'] ) && $settings['progress_border_color'] !== $defaults['progress_border_color'] ) {
 	?>
 	--progress-border-color-b: <?php echo esc_html( FrmStylesHelper::adjust_brightness( $settings['progress_border_color'], -10 ) ); ?>;
+	<?php
+}
+
+if ( isset( $settings['date_band_color'] ) && $settings['date_band_color'] !== $defaults['date_band_color'] ) {
+	?>
+	--date-band-fill: <?php echo esc_html( FrmStylesHelper::hex2rgba( $settings['date_band_color'], 0.1 ) ); ?>;
 <?php } ?>
 }
 
@@ -270,7 +276,28 @@ $thumb      .= 'color:' . esc_html( $settings['progress_active_color'] . $import
 <?php } ?>
 
 /* Datepicker */
-<?php if ( empty( $defaults['theme_css'] ) || 'ui-lightness' === $defaults['theme_css'] ) : ?>
+<?php
+// Lite's focus rule skips readonly fields, and flatpickr marks its input readonly, so the
+// field that owns the open calendar was the only one in the form that never looked active.
+// The jQuery UI datepicker left the input editable, so it picked up that rule on its own.
+// The base colors for the same input are in pro_fields.css.php, where the variables are
+// enough. The focus state needs this file because the glow color is mixed in PHP per style.
+?>
+.<?php echo esc_html( $settings['style_class'] ); ?> input.flatpickr-input[readonly]:not([disabled]):focus {
+	color: var(--text-color)<?php echo esc_html( $important ); ?>;
+	background-color: var(--bg-color-active)<?php echo esc_html( $important ); ?>;
+	border-color: var(--border-color-active)<?php echo esc_html( $important ); ?>;
+<?php if ( empty( $settings['remove_box_shadow_active'] ) ) { ?>
+	box-shadow: 0 0 5px 0 rgba(<?php echo esc_html( FrmStylesHelper::hex2rgb( $settings['border_color_active'] ) ); ?>, 0.6);
+<?php } ?>
+}
+
+<?php
+// The theme_css check only means anything for the jQuery UI datepicker, where picking a
+// jQuery theme is how a site opts out of Formidable's datepicker CSS. flatpickr opts out
+// through frm-datepicker-custom-theme instead, so it must not be gated on theme_css.
+if ( ! FrmProAppHelper::use_jquery_datepicker() || empty( $defaults['theme_css'] ) || 'ui-lightness' === $defaults['theme_css'] ) :
+	?>
 .<?php echo esc_html( $settings['style_class'] ); ?> .ui-datepicker-title > select {
 	color: <?php echo esc_html( $settings['text_color'] ); ?>;
 	color: var(--text-color)<?php echo esc_html( $important ); ?>;
@@ -321,14 +348,15 @@ $thumb      .= 'color:' . esc_html( $settings['progress_active_color'] . $import
 .<?php echo esc_html( $settings['style_class'] ); ?> td.ui-datepicker-current-day .ui-state-default:not(.ui-state-hover) {
 	color: #fff;
 }
-.<?php echo esc_html( $settings['style_class'] ); ?> .frm-datepicker:not(.frm-datepicker-custom-theme) .flatpickr-day.today:hover,
-.<?php echo esc_html( $settings['style_class'] ); ?>.frm-datepicker:not(.frm-datepicker-custom-theme) .flatpickr-day.today:hover,
+	<?php // The band fill is !important here, so today has to be excluded from it by selector when it cannot be picked. ?>
+.<?php echo esc_html( $settings['style_class'] ); ?> .frm-datepicker:not(.frm-datepicker-custom-theme) .flatpickr-day.today:not(.flatpickr-disabled):hover,
+.<?php echo esc_html( $settings['style_class'] ); ?>.frm-datepicker:not(.frm-datepicker-custom-theme) .flatpickr-day.today:not(.flatpickr-disabled):hover,
 .<?php echo esc_html( $settings['style_class'] ); ?> td:not(.ui-datepicker-current-day) .ui-state-hover {
 	color: var(--date-band-color)<?php echo esc_html( $important ); ?>;
-	background: #f5faff !important;
+	background: var(--date-band-fill) !important;
 	font-weight: 600;
 }
-<?php endif; // end if empty( $defaults['theme_css'] ) || 'ui-lightness' === $defaults['theme_css'] ?>
+<?php endif; // end datepicker styling check ?>
 /* End Datepicker */
 
 /* Submit Buttons */

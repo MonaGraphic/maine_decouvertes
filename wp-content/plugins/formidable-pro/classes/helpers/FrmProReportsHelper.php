@@ -84,12 +84,13 @@ class FrmProReportsHelper {
 	private static function show_expired_reports_error() {
 		FrmAppController::show_error_modal(
 			array(
-				'title'         => __( 'You can\'t view reports', 'formidable-pro' ),
-				'body'          => __( 'Your license has expired. Renew your license to continue viewing reports.', 'formidable-pro' ),
-				'cancel_url'    => admin_url( 'admin.php?page=formidable' ),
-				'cancel_text'   => __( 'Go Back', 'formidable' ),
-				'continue_url'  => FrmAppHelper::admin_upgrade_link( 'expired-reports', 'account/downloads/' ),
-				'continue_text' => __( 'Renew Now', 'formidable' ),
+				'title'           => __( 'You can\'t view reports', 'formidable-pro' ),
+				'body'            => __( 'Your license has expired. Renew your license to continue viewing reports.', 'formidable-pro' ),
+				'cancel_url'      => admin_url( 'admin.php?page=formidable' ),
+				'cancel_text'     => __( 'Go Back', 'formidable' ),
+				'continue_url'    => FrmAppHelper::admin_upgrade_link( 'expired-reports', 'account/downloads/' ),
+				'continue_text'   => __( 'Renew Now', 'formidable' ),
+				'continue_target' => '_blank',
 			)
 		);
 	}

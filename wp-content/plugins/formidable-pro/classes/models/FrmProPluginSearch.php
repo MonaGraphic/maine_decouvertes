@@ -23,7 +23,7 @@ class FrmProPluginSearch {
 			'slug'         => $slug,
 			'plugin'       => $slug . '/' . $slug . '.php',
 			'version'      => '',
-			'author'       => '<a href="https://formidableforms.com/go/memberpress/">MemberPress</a>',
+			'author'       => '<a href="https://formidableforms.com/go/memberpress/" target="_blank" rel="noopener">MemberPress</a>',
 			'icons'        => array(
 				'svg' => FrmProAppHelper::plugin_url() . '/images/mp-icon.svg',
 			),

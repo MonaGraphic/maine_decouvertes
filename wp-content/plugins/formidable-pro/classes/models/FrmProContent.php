@@ -903,18 +903,14 @@ class FrmProContent {
 		// Replace identical conditional and foreach shortcodes in this loop
 		while ( $start_pos !== false ) {
 			$start_pos_len = strlen( $atts['short_key'] );
-			$end_pos       = strpos( $content, '[/' . $condition . ' ' . $tag . ']', $start_pos );
-			$end_pos_len   = strlen( '[/' . $condition . ' ' . $tag . ']' );
+			$end_tag       = self::get_matching_end_tag( $content, $start_pos + $start_pos_len, $condition, $tag );
 
-			if ( $end_pos === false ) {
-				$end_pos     = strpos( $content, '[/' . $condition . ']', $start_pos );
-				$end_pos_len = strlen( '[/' . $condition . ']' );
-
-				if ( $end_pos === false ) {
-					return;
-				}
+			if ( false === $end_tag ) {
+				return;
 			}
 
+			$end_pos        = $end_tag['end_pos'];
+			$end_pos_len    = $end_tag['end_pos_len'];
 			$total_len      = $end_pos + $end_pos_len - $start_pos;
 			$is_empty       = $replace_with === '' || is_null( $replace_with ) || false === $replace_with;
 			$substring_args = compact( 'content', 'start_pos', 'start_pos_len', 'end_pos' );
@@ -953,18 +949,147 @@ class FrmProContent {
 	}
 
 	/**
+	 * Find the closing tag that belongs to an opening conditional or foreach shortcode.
+	 *
+	 * Shortcodes of the same type that are nested inside the block are skipped, so
+	 * [if get param="a"][if get param="b"]x[/if get][/if get] closes on the second
+	 * [/if get] instead of the first one in the content. When the content is not
+	 * balanced, the first closing tag is used so the previous behavior is kept.
+	 *
+	 * @since 6.35
+	 *
+	 * @param string $content
+	 * @param int    $search_from The position directly after the opening tag.
+	 * @param string $condition   Either 'if' or 'foreach'.
+	 * @param string $tag         The shortcode tag, for example 'get' or a field id.
+	 *
+	 * @return array|false Array with 'end_pos' and 'end_pos_len' keys, or false when there is no closing tag.
+	 */
+	private static function get_matching_end_tag( $content, $search_from, $condition, $tag ) {
+		$first_end_tag = self::get_first_end_tag( $content, $search_from, $condition, $tag );
+
+		if ( false === $first_end_tag ) {
+			return false;
+		}
+
+		$pattern = '/\[(\/)?' . $condition . '\b[^\]]*\]/s';
+		$found   = preg_match_all( $pattern, $content, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE, $search_from );
+
+		if ( ! $found ) {
+			return $first_end_tag;
+		}
+
+		$depth = 1;
+
+		foreach ( $matches[0] as $key => $match ) {
+			$is_end_tag = '' !== $matches[1][ $key ][0];
+			$depth     += $is_end_tag ? -1 : 1;
+
+			if ( 0 === $depth ) {
+				return array(
+					'end_pos'     => $match[1],
+					'end_pos_len' => strlen( $match[0] ),
+				);
+			}
+		}
+
+		return $first_end_tag;
+	}
+
+	/**
+	 * Get the first closing tag after a position, preferring the tag-specific closing tag.
+	 *
+	 * @since 6.35
+	 *
+	 * @param string $content
+	 * @param int    $search_from The position to start searching from.
+	 * @param string $condition   Either 'if' or 'foreach'.
+	 * @param string $tag         The shortcode tag, for example 'get' or a field id.
+	 *
+	 * @return array|false Array with 'end_pos' and 'end_pos_len' keys, or false when there is no closing tag.
+	 */
+	private static function get_first_end_tag( $content, $search_from, $condition, $tag ) {
+		$end_tag = '[/' . $condition . ' ' . $tag . ']';
+		$end_pos = strpos( $content, $end_tag, $search_from );
+
+		if ( false === $end_pos ) {
+			$end_tag = '[/' . $condition . ']';
+			$end_pos = strpos( $content, $end_tag, $search_from );
+
+			if ( false === $end_pos ) {
+				return false;
+			}
+		}
+
+		return array(
+			'end_pos'     => $end_pos,
+			'end_pos_len' => strlen( $end_tag ),
+		);
+	}
+
+	/**
 	 * Get either the left or the right substring for if conditions containing an [else] shortcode.
 	 *
 	 * @since 5.0.14
 	 *
 	 * @param string $substring
-	 * @param bool   $else if true, the second half of the explode will be returned. if false, the first half is returned.
+	 * @param bool   $else if true, the substring after [else] is returned. if false, the substring before it is returned.
 	 *
 	 * @return string
 	 */
 	private static function get_conditional_substring_half( $substring, $else = false ) {
-		$split = explode( '[else]', $substring );
-		return $split[ $else ? 1 : 0 ];
+		$else_pos = self::get_else_position( $substring );
+
+		if ( false === $else_pos ) {
+			return $else ? '' : $substring;
+		}
+
+		if ( ! $else ) {
+			return substr( $substring, 0, $else_pos );
+		}
+
+		return substr( $substring, $else_pos + strlen( '[else]' ) );
+	}
+
+	/**
+	 * Get the position of the [else] shortcode that belongs to this condition.
+	 *
+	 * An [else] inside a nested [if] block belongs to that block, so it is skipped here.
+	 *
+	 * @since 6.35
+	 *
+	 * @param string $substring The content inside an if condition.
+	 *
+	 * @return false|int
+	 */
+	private static function get_else_position( $substring ) {
+		$found = preg_match_all( '/\[(\/)?if\b[^\]]*\]|\[else\]/s', $substring, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE );
+
+		if ( ! $found ) {
+			return false;
+		}
+
+		$depth = 0;
+
+		foreach ( $matches[0] as $key => $match ) {
+			if ( '[else]' === $match[0] ) {
+				if ( 0 === $depth ) {
+					return $match[1];
+				}
+
+				continue;
+			}
+
+			$is_end_tag = '' !== $matches[1][ $key ][0];
+
+			if ( ! $is_end_tag ) {
+				++$depth;
+			} elseif ( $depth > 0 ) {
+				--$depth;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -992,7 +1117,7 @@ class FrmProContent {
 	 * @return bool
 	 */
 	private static function conditional_substring_contains_else( $substring ) {
-		return str_contains( $substring, '[else]' );
+		return false !== self::get_else_position( $substring );
 	}
 
 	/**

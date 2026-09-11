@@ -232,15 +232,85 @@ function frmProFormJS() {
 	frmDatepickerPro.themeType = frmDatepickerPro.getThemeType();
 	frmDatepickerPro.isUsingACustomTheme = frmDatepickerPro.themeType !== '';
 	frmDatepickerPro.callbacks = {};
+
+	/**
+	 * Get the style classes to copy from the form onto the calendar.
+	 *
+	 * A popup calendar is appended to the body, so it sits outside of the form and
+	 * cannot inherit either the style class or the CSS variables scoped to it. The
+	 * jQuery UI datepicker copies the form classes for the same reason, in
+	 * addFormidableClassToDatepicker.
+	 *
+	 * @since 6.35
+	 *
+	 * @param {HTMLElement} input The date input the calendar belongs to.
+	 * @returns {Array} Class names to add to the calendar container.
+	 */
+	frmDatepickerPro.getStyleClasses = function( input ) {
+		const formContainer = input.closest( '.with_frm_style' );
+		if ( ! formContainer ) {
+			return [ 'with_frm_style' ];
+		}
+
+		return [ 'with_frm_style' ].concat(
+			Array.prototype.filter.call(
+				formContainer.classList,
+				( className ) => className.startsWith( 'frm_style_' )
+			)
+		);
+	};
+
+	/**
+	 * Gets the repeater row an element sits in, so a lookup cannot escape into another row.
+	 *
+	 * Every row renders the same ids and field ids, so a document wide lookup always answers with
+	 * the first row and leaves every later row pointing at it.
+	 *
+	 * @since 6.24
+	 *
+	 * @param {HTMLElement} element An element inside the row.
+	 * @return {Element|Document} The row, or the document when the element is not in a repeater.
+	 */
+	frmDatepickerPro.getRepeaterRow = function( element ) {
+		return element.closest( '.frm_repeat_sec, .frm_repeat_inline, .frm_repeat_grid' ) || document;
+	};
+
+	/**
+	 * Finds the hidden input an inline picker writes its value into.
+	 *
+	 * The alt field selector is built from the field key alone, so inside a repeater it matches
+	 * nothing: every row appends its own index to the id. Falling back to the element's own id
+	 * covers that, scoped to the row so one row cannot answer for another.
+	 *
+	 * @since 6.24
+	 *
+	 * @param {HTMLElement} input       The element the picker is built on.
+	 * @param {string}      altSelector The alt field selector from the field settings.
+	 * @return {HTMLElement|null} The alt input, or null when there is none.
+	 */
+	frmDatepickerPro.getAltInputElement = function( input, altSelector ) {
+		const scope = frmDatepickerPro.getRepeaterRow( input );
+
+		if ( input.id ) {
+			const rowAltInput = scope.querySelector( '#' + CSS.escape( input.id + '_alt' ) );
+			if ( rowAltInput ) {
+				return rowAltInput;
+			}
+		}
+
+		return altSelector ? scope.querySelector( altSelector ) : null;
+	};
+
 	frmDatepickerPro.callbacks.onOpen = function( selectedDates, dateStr, instance ) {
-		instance.calendarContainer.classList.add( 'frm-datepicker', 'with_frm_style' );
+		instance.frmStyleClasses = frmDatepickerPro.getStyleClasses( instance.input );
+		instance.calendarContainer.classList.add( 'frm-datepicker', ...instance.frmStyleClasses );
 		if ( frmDatepickerPro.isUsingACustomTheme ) {
 			instance.calendarContainer.classList.add( 'frm-datepicker-custom-theme', frmDatepickerPro.themeType );
 		}
 	};
 	frmDatepickerPro.callbacks.onClose = function( selectedDates, dateStr, instance ) {
 		if ( ! instance.config.inline ) {
-			instance.calendarContainer.classList.remove( 'frm-datepicker', 'with_frm_style' );
+			instance.calendarContainer.classList.remove( 'frm-datepicker', ...( instance.frmStyleClasses || [ 'with_frm_style' ] ) );
 			if ( frmDatepickerPro.isUsingACustomTheme ) {
 				instance.calendarContainer.classList.remove( 'frm-datepicker-custom-theme', frmDatepickerPro.themeType );
 			}
@@ -281,20 +351,46 @@ function frmProFormJS() {
 			return disabledDates.map( date => new Date( date + 'T00:00:00' ) );
 		};
 
+		/**
+		 * Gets the input a picker's value belongs in.
+		 *
+		 * An inline picker is built on a div, so the value it produces has to be written to the
+		 * hidden input the field actually submits. That input is the picker's alt input, which is
+		 * resolved per repeater row, so prefer it over looking one up by name.
+		 *
+		 * @since 6.24
+		 *
+		 * @param {Object} instance The Flatpickr instance.
+		 * @return {HTMLElement} The input to write to, or the element the picker was built on.
+		 */
 		this.getInstanceElement = ( instance ) => {
-			if ( instance.config.inline && 'INPUT' !== instance.element.nodeName ) {
-				const fieldId = instance.element.dataset.fieldId;
-				const element = document.querySelector( `input[name="item_meta[${ fieldId }]"]` );
-				if ( element ) {
-					return element;
-				}
+			if ( ! instance.config.inline || 'INPUT' === instance.element.nodeName ) {
 				return instance.element;
 			}
-			return instance.element;
+
+			if ( instance.config.altInputElement ) {
+				return instance.config.altInputElement;
+			}
+
+			const fieldId = instance.element.dataset.fieldId;
+
+			// A repeater row names its inputs item_meta[section][row][field], so an exact
+			// item_meta[field] match only ever finds a field that is not in a repeater, and a
+			// document wide lookup would answer with the first row for every row.
+			const scope = frmDatepickerPro.getRepeaterRow( instance.element );
+
+			return scope.querySelector( `input[name="item_meta[${ fieldId }]"], input[name$="][${ fieldId }]"]` ) || instance.element;
 		};
 
+
 		/**
-		 * Update the range fields(start field and the related end field) on change.
+		 * COMPATIBILITY PATH. Do not fix bugs here.
+		 *
+		 * Date ranges belong to the Dates add-on, which now owns this as
+		 * frmDatepickerInstance.syncRangeFields. This copy only runs for a site that has updated
+		 * Pro but not yet the add-on, so that its ranges keep working rather than breaking on
+		 * upgrade. Treat it as frozen: fix range behaviour in the add-on, and delete this once the
+		 * add-on version that owns it has been out long enough.
 		 *
 		 * @since 6.24
 		 *
@@ -312,29 +408,95 @@ function frmProFormJS() {
 			// The pair is keyed by the start field's id. On the end field that is
 			// data-range-start-field-id, so it must win over the field's own id.
 			const fieldId                = input.dataset.rangeStartFieldId || input.dataset.fieldId;
-			const startDateField         = document.querySelector( `input[data-field-id="${ fieldId }"]` ) || document.querySelector( `input[type="hidden"][name="item_meta[${ fieldId }]"]` );
 			const [ startDate, endDate ] = selectedDates;
-			const endDateField           = 'undefined' !== typeof endDate ? document.querySelector( `input[data-range-start-field-id="${ fieldId }"]` ) : null;
 			const instanceElement        = this.getInstanceElement( instance );
+
+			// Every row of a repeater renders the same data-field-id, so a document wide lookup would
+			// always resolve to the first row and leave every later row unsplit. Search inside the row
+			// when there is one.
+			const scope = instanceElement.closest( '.frm_repeat_sec, .frm_repeat_inline, .frm_repeat_grid' ) || document;
+
+			// The name suffix match is the fallback for a half of the pair that is carried over as a
+			// hidden input, which is how an earlier page of a multi page form is preserved. It covers
+			// both item_meta[123] and the item_meta[section][row][123] form a repeater uses.
+			const startDateField = scope.querySelector( `input[data-field-id="${ fieldId }"]` )
+				|| scope.querySelector( `input[type="hidden"][name$="[${ fieldId }]"]` );
+
+			// Resolve the end field whatever the selection state is. Skipping it while only one date is
+			// picked used to leave the two fields holding different ranges. The name suffix match is
+			// the same multi page fallback the start field gets, keyed off the end field id the start
+			// field carries, since a half preserved from another page has no data attributes.
+			const endFieldId = instanceElement.dataset.rangeEndFieldId;
+			const endDateField = scope.querySelector( `input[data-range-start-field-id="${ fieldId }"]` )
+				|| ( endFieldId ? scope.querySelector( `input[type="hidden"][name$="[${ endFieldId }]"]` ) : null );
+
+			// A range field is not always paired, and the partner is not always rendered yet. Split
+			// this field's own value anyway, so a visible input never keeps the joined range string.
+			if ( ! startDateField || ! endDateField ) {
+				if ( 'undefined' !== typeof endDate ) {
+					instanceElement.value = flatpickr.formatDate( input.dataset.rangeStartFieldId ? endDate : startDate, settings.options.fpDateFormat );
+				}
+				return;
+			}
+
+			/**
+			 * Points one half of the pair at its own date.
+			 *
+			 * The partner does not always have a picker. On a multi page form the other half arrives as
+			 * a plain hidden input, and reading .setDate off it used to throw before the value was
+			 * written, which left a stale date behind and saved a range nobody picked.
+			 *
+			 * @param {HTMLElement} field The field to write to.
+			 * @param {Date}        date  The date that half represents.
+			 * @returns {void}
+			 */
+			const setHalf = ( field, date ) => {
+				if ( field._flatpickr ) {
+					field._flatpickr.setDate( dateStr );
+				}
+
+				field.value = flatpickr.formatDate( date, settings.options.fpDateFormat );
+			};
 
 			instanceElement.dataset.rangeValue = dateStr;
 
-			if ( instanceElement === startDateField && null !== endDateField ) {
-				instanceElement.value              = flatpickr.formatDate( startDate, settings.options.fpDateFormat );
-				endDateField.dataset.rangeValue    = dateStr;
+			// The range is only half picked. Point both halves of the pair at that one date, so
+			// neither field is left holding a range from an earlier selection. Blanking the end field
+			// instead would not survive, since the add-on refreshes every picker after this runs and
+			// Flatpickr rewrites each input from its own selected dates.
+			if ( 'undefined' === typeof endDate ) {
+				const partialValue = flatpickr.formatDate( startDate, settings.options.fpDateFormat );
 
-				endDateField._flatpickr.setDate( dateStr );
-				endDateField.value = flatpickr.formatDate( endDate, settings.options.fpDateFormat );
+				startDateField.dataset.rangeValue = dateStr;
+				endDateField.dataset.rangeValue   = dateStr;
+
+				if ( instanceElement !== startDateField && startDateField._flatpickr ) {
+					startDateField._flatpickr.setDate( startDate );
+				}
+				if ( instanceElement !== endDateField && endDateField._flatpickr ) {
+					endDateField._flatpickr.setDate( startDate );
+				}
+
+				startDateField.value = partialValue;
+				endDateField.value   = partialValue;
+				return;
+			}
+
+			if ( instanceElement === startDateField ) {
+				instanceElement.value           = flatpickr.formatDate( startDate, settings.options.fpDateFormat );
+				endDateField.dataset.rangeValue = dateStr;
+
+				setHalf( endDateField, endDate );
 
 				// Trigger the change event to end range field to update the calculation
 				endDateField.dispatchEvent( new Event( 'change', { bubbles: true } ) );
 			}
 
 			if ( instanceElement === endDateField ) {
-				instanceElement.value              = flatpickr.formatDate( endDate, settings.options.fpDateFormat );
-				startDateField.dataset.rangeValue  = dateStr;
-				startDateField._flatpickr.setDate( dateStr );
-				startDateField.value               = flatpickr.formatDate( startDate, settings.options.fpDateFormat );
+				instanceElement.value             = flatpickr.formatDate( endDate, settings.options.fpDateFormat );
+				startDateField.dataset.rangeValue = dateStr;
+
+				setHalf( startDateField, startDate );
 			}
 		};
 
@@ -357,18 +519,46 @@ function frmProFormJS() {
 			closeOnSelect: true,
 			showMonths,
 			locale: {
-				...flatpickr.l10ns[ settings.locale || settings.options.locale ],
+				...flatpickr.l10ns[ frmDatepickerPro.getFlatpickrLocaleKey( settings.locale || settings.options.locale ) ],
 				firstDayOfWeek: firstDay,
 			},
 			mode,
 			disable: [
 				function( date ) {
-					return settings.formidable_dates && settings.formidable_dates.daysEnabled && -1 === settings.formidable_dates.daysEnabled.indexOf( date.getDay() );
+					if ( ! settings.formidable_dates ) {
+						return false;
+					}
+
+					// The Dates add-on owns these settings and ranks its three rules in one place, so
+					// defer to it when it is active. Listing blackout dates as separate disable entries
+					// could not work with it, since Flatpickr treats each entry as its own veto and an
+					// excepted date would never be able to re-enable a blacked out day.
+					if ( 'function' === typeof window.frmDatepickerInstance?.isDateAllowed ) {
+						return ! window.frmDatepickerInstance.isDateAllowed( date, settings.formidable_dates );
+					}
+
+					return settings.formidable_dates.daysEnabled && -1 === settings.formidable_dates.daysEnabled.indexOf( date.getDay() );
 				},
-				...( disabledDates ? disabledDates : [] )
+				function( date ) {
+					// The frm_selectable_dates and frm_dates_selectable_response filters supply a
+					// JavaScript expression that only jQuery UI's beforeShowDay used to evaluate, so a
+					// site relying on either filter lost it the moment Flatpickr was switched on.
+					if ( ! settings.formidable_dates || 'function' !== typeof window.frmDatepickerInstance?.passesSelectableResponse ) {
+						return false;
+					}
+
+					return ! window.frmDatepickerInstance.passesSelectableResponse( date, settings.formidable_dates );
+				},
+				...( 'function' === typeof window.frmDatepickerInstance?.isDateAllowed ? [] : ( disabledDates ? disabledDates : [] ) )
 			],
 			onReady( selectedDates, dateStr, instance ) {
-				setTimeout( () => frmDatepickerPro.setDefaultRangeValue( instance.element ), 0 );
+				// The Dates add-on owns this. Its own copy is only missing on a site that has not
+				// updated it yet, which still has to get its saved ranges back.
+				const setDefaultRange = 'function' === typeof window.frmDatepickerInstance?.setDefaultRangeValue
+					? window.frmDatepickerInstance.setDefaultRangeValue
+					: frmDatepickerPro.setDefaultRangeValue;
+
+				setTimeout( () => setDefaultRange( instance.element ), 0 );
 				if ( instance.config.inline ) {
 					instance.calendarContainer.classList.add( 'frm-datepicker', 'with_frm_style', 'frm_date_inline' );
 					if ( frmDatepickerPro.isUsingACustomTheme ) {
@@ -388,27 +578,136 @@ function frmProFormJS() {
 					}
 				}
 
-				this.updateRangeFieldsOnChange( mode, instance, dateStr, selectedDates );
+				// Flatpickr only keeps the hooks built in this object, so an onChange handler passed in
+				// through the field settings (the Dates add-on sets one) never reaches it. Call it
+				// explicitly. It runs before the range sync because refreshing a picker makes Flatpickr
+				// rewrite the input from its own selected dates, which for a range is the whole range
+				// string. Syncing afterwards puts the single date back on each half of the pair.
+				//
+				// The add-on's handler was unreachable until this call existed, so the version that
+				// predates it reads a variable that is out of scope there and throws every time. That
+				// version never ran this code at all, so skip it rather than start raising errors on a
+				// site whose only change was updating Pro. getFieldIdFromField is what it reaches for,
+				// and the add-on that owns it is the first one whose handler survives being called.
+				const addOnHandlesOnChange = 'function' === typeof window.frmDatepickerInstance?.getFieldIdFromField;
 
+				if ( addOnHandlesOnChange && settings.options && 'function' === typeof settings.options.onChange ) {
+					try {
+						settings.options.onChange( selectedDates, dateStr, instance );
+					} catch ( error ) {
+						// Nothing below depends on it, so a handler that throws must not take the range
+						// syncing down with it.
+						if ( window.console && window.console.error ) {
+							window.console.error( error );
+						}
+					}
+				}
+
+				if ( 'range' === mode ) {
+					// Same story as onReady: the add-on owns the split, this falls back to Pro's own
+					// copy only while the add-on is behind.
+					if ( 'function' === typeof window.frmDatepickerInstance?.syncRangeFields ) {
+						window.frmDatepickerInstance.syncRangeFields( {
+							input,
+							instanceElement: this.getInstanceElement( instance ),
+							dateStr,
+							selectedDates,
+							dateFormat: settings.options.fpDateFormat
+						} );
+					} else {
+						this.updateRangeFieldsOnChange( mode, instance, dateStr, selectedDates );
+					}
+				}
 			},
 			onOpen( selectedDates, dateStr, instance ) {
 				frmDatepickerPro.callbacks.onOpen( selectedDates, dateStr, instance );
 			},
-			onClose: frmDatepickerPro.callbacks.onClose,
+			onClose: ( selectedDates, dateStr, instance ) => {
+				frmDatepickerPro.callbacks.onClose( selectedDates, dateStr, instance );
+
+				// Closing on an unfinished range is Flatpickr discarding the selection: it empties
+				// its own input and forgets the date. The other half of the pair is not its input
+				// though, so without this it keeps a date the range never ended up using. The add-on
+				// owns both halves, so hand it the close.
+				if ( 'range' === mode && 'function' === typeof window.frmDatepickerInstance?.clearIncompleteRange ) {
+					window.frmDatepickerInstance.clearIncompleteRange( {
+						input,
+						instanceElement: this.getInstanceElement( instance ),
+						selectedDates
+					} );
+				}
+			},
+			// jQuery UI drew the same calendar on every device. Flatpickr hands a phone the browser's
+			// native date input instead, and that input carries over only minDate and maxDate, so the
+			// disable predicate above and range mode would both be silently dropped there.
+			disableMobile: true,
 			shorthandCurrentMonth: true,
 			altInputClass: ''
 		};
 
 		if ( settings.formidable_dates && settings.formidable_dates.inline ) {
 			flatpickrOptions.altInput = true;
-			flatpickrOptions.altInputElement = document.querySelector( settings.options.altField );
+			flatpickrOptions.altInputElement = frmDatepickerPro.getAltInputElement( input, settings.options.altField );
 		}
 
 		return flatpickrOptions;
 	};
 
+
 	/**
-	 * Set the default range value for the datepicker.
+	 * Locale codes whose Flatpickr l10n key is not the code the date field stores.
+	 *
+	 * The field's locale setting uses jQuery UI's codes, and Flatpickr names a number of the same
+	 * languages differently, so a straight lookup silently falls back to English for these. The
+	 * value is the key the matching l10n file registers on flatpickr.l10ns, which is not always the
+	 * file's own name either. Entries with no Flatpickr equivalent at all are left out on purpose,
+	 * since English is all that is available for them.
+	 *
+	 * @since 6.35
+	 *
+	 * @type {object}
+	 */
+	frmDatepickerPro.localeKeyMap = {
+		'ar-DZ': 'ar',
+		'ca': 'ca',
+		'cy-GB': 'cy',
+		'de-AT': 'at',
+		'el': 'gr',
+		'fr-CA': 'fr',
+		'fr-CH': 'fr',
+		'kk': 'kz',
+		'nb': 'no',
+		'pt-BR': 'pt',
+		'sr': 'sr',
+		'sr-SR': 'sr',
+		'vi': 'vn',
+		'zh-CN': 'zh',
+		'zh-HK': 'zh_tw',
+		'zh-TW': 'zh_tw'
+	};
+
+	/**
+	 * Gets the key a locale's translations are registered under on flatpickr.l10ns.
+	 *
+	 * @since 6.35
+	 *
+	 * @param {string} locale The locale stored on the date field.
+	 * @returns {string}
+	 */
+	frmDatepickerPro.getFlatpickrLocaleKey = function( locale ) {
+		if ( ! locale ) {
+			return 'default';
+		}
+
+		return frmDatepickerPro.localeKeyMap[ locale ] || locale;
+	};
+
+	/**
+	 * COMPATIBILITY PATH. Do not fix bugs here.
+	 *
+	 * Superseded by frmDatepickerInstance.setDefaultRangeValue in the Dates add-on. Kept so a site
+	 * running an older add-on against this version of Pro still gets its saved ranges back onto the
+	 * calendar. Frozen, see updateRangeFieldsOnChange above.
 	 *
 	 * @since 6.24
 	 *
@@ -437,13 +736,33 @@ function frmProFormJS() {
 			return null;
 		}
 
-		const startDate = input.dataset.rangeStartFieldId ? document.querySelector( `input[data-field-id="${ input.dataset.rangeStartFieldId }"]` ) : input;
+		// Scope to the repeater row for the same reason updateRangeFieldsOnChange does: every row
+		// carries the same data-field-id, so a document wide lookup resolves to the first row.
+		const scope = input.closest( '.frm_repeat_sec, .frm_repeat_inline, .frm_repeat_grid' ) || document;
+
+		// On a multi page form the half that lives on another page is preserved as a bare hidden
+		// input carrying neither data attribute, so fall back to matching its name. Without this the
+		// pair cannot be resolved and the date already picked on the other page is not shown here.
+		const findHalf = ( selector, fieldId ) => scope.querySelector( selector ) || ( fieldId ? scope.querySelector( `input[type="hidden"][name$="[${ fieldId }]"]` ) : null );
+
+		const startDate = input.dataset.rangeStartFieldId ? findHalf( `input[data-field-id="${ input.dataset.rangeStartFieldId }"]`, input.dataset.rangeStartFieldId ) : input;
+		const endDate = input.dataset.rangeStartFieldId ? input : findHalf( `input[data-range-start-field-id="${ input.dataset.fieldId }"]`, input.dataset.rangeEndFieldId );
+
+		// A range field can be left unpaired, for instance when its partner field was deleted. Reading
+		// a value off either half then throws and the datepicker never finishes setting up.
+		if ( ! startDate || ! endDate ) {
+			return;
+		}
+
 		const startDateValue = startDate.value;
-		const endDate = input.dataset.rangeStartFieldId ? input : document.querySelector( `input[data-range-start-field-id="${ input.dataset.fieldId }"]` );
 		const endDateValue = endDate.value;
 
+		// Flatpickr parses a range string by splitting it on the separator of the active locale, so a
+		// hardcoded ' to ' is unreadable in every other language.
+		const rangeValue = startDateValue + frmDatepickerPro.getRangeSeparator( instanceElement._flatpickr ) + endDateValue;
+
 		if ( instanceElement._flatpickr.config.inline ) {
-			instanceElement._flatpickr.setDate( startDateValue + ' to ' + endDateValue );
+			instanceElement._flatpickr.setDate( rangeValue );
 			startDate.value = startDateValue;
 			endDate.value = endDateValue;
 			return;
@@ -455,10 +774,24 @@ function frmProFormJS() {
 			return;
 		}
 
-		startDate._flatpickr.setDate( startDateValue + ' to ' + endDateValue );
+		startDate._flatpickr.setDate( rangeValue );
 		startDate.value = startDateValue;
-		endDate._flatpickr.setDate( startDateValue + ' to ' + endDateValue );
+		if ( endDate._flatpickr ) {
+			endDate._flatpickr.setDate( rangeValue );
+		}
 		endDate.value = endDateValue;
+	};
+
+	/**
+	 * Gets the range separator Flatpickr uses to join and split a range string.
+	 *
+	 * @since 6.35
+	 *
+	 * @param {object} instance The Flatpickr instance.
+	 * @returns {string}
+	 */
+	frmDatepickerPro.getRangeSeparator = function( instance ) {
+		return instance?.l10n?.rangeSeparator || ' to ';
 	};
 
 	/**
@@ -586,14 +919,14 @@ function frmProFormJS() {
 			if ( optionsData.options.maxDate ) {
 				dates.max = optionsData.options.maxDate;
 			} else {
-				dates.max = frmDatepickerPro.parseOffsetDate( optionsData.formidable_dates.maximum_date_val );
+				dates.max = frmDatepickerPro.resolveDateLimit( optionsData.formidable_dates.maximum_date_cond, optionsData.formidable_dates.maximum_date_val, dates.max );
 			}
 		}
 		if ( optionsData.formidable_dates.minimum_date_cond ) {
 			if ( optionsData.options.minDate ) {
 				dates.min = optionsData.options.minDate;
 			} else {
-				dates.min = frmDatepickerPro.parseOffsetDate( optionsData.formidable_dates.minimum_date_val );
+				dates.min = frmDatepickerPro.resolveDateLimit( optionsData.formidable_dates.minimum_date_cond, optionsData.formidable_dates.minimum_date_val, dates.min );
 			}
 		}
 
@@ -601,35 +934,80 @@ function frmProFormJS() {
 	};
 
 	/**
+	 * Resolves a minimum or maximum limit from the Dates add-on settings.
+	 *
+	 * Only reached when the add-on has not already worked the limit out, which happens when the
+	 * datepicker is built before the add-on has run over the field.
+	 *
+	 * @since 6.35
+	 *
+	 * @param {string} condition   How the limit is set: a specific date, today, or field_<key>.
+	 * @param {string} offsetValue The specific date, or the offset to apply to today.
+	 * @param {object} fallback    Limit to keep when the condition cannot be resolved here.
+	 * @returns {object|string}
+	 */
+	frmDatepickerPro.resolveDateLimit = function( condition, offsetValue, fallback ) {
+		// A limit measured from another date field depends on what that field currently holds, which
+		// only the Dates add-on tracks. Guessing an offset from today would invent a wrong limit.
+		if ( 0 === condition.indexOf( 'field_' ) ) {
+			return fallback;
+		}
+
+		// A specific date is already a date, there is no offset to apply.
+		if ( 'today' !== condition ) {
+			return offsetValue;
+		}
+
+		// Offsets are the add-on's own setting, so prefer its parser and keep one definition of what
+		// "1 week" means. Older versions of the add-on do not expose it, so fall back to the local
+		// copy below rather than dropping the limit for anyone who updated only this plugin.
+		if ( 'function' === typeof window.frmDatepickerInstance?.applyDateOffset ) {
+			// An offset carrying no unit, an empty one included, means today itself.
+			return window.frmDatepickerInstance.applyDateOffset( new Date(), offsetValue );
+		}
+
+		const offsetDate = frmDatepickerPro.parseOffsetDate( offsetValue );
+
+		return offsetDate instanceof Date ? offsetDate : new Date();
+	};
+
+	/**
 	 * Parse the offset date from the datepickerJsOptions.
+	 *
+	 * Kept only for the case where the Dates add-on is older than the version that shares its own
+	 * parser. When both plugins are current, resolveDateLimit uses the add-on's instead, so the two
+	 * cannot disagree about what an offset means.
 	 *
 	 * @since 6.19
 	 *
 	 * @param {string} date
-	 * @returns {object}
+	 * @returns {object|string}
 	 */
 	frmDatepickerPro.parseOffsetDate = function( date ) {
-		const cleanedDate = date.toLowerCase().replace(/\s+/g, '');
-		const regex       = /^([+-]\d+)(day|days|month|months|year|years)$/;
-		const match       = cleanedDate.match( regex );
+		if ( ! date ) {
+			return date;
+		}
+
+		// Sign optional, and weeks and single letter units accepted, matching what the add-on allows.
+		const match = String( date ).toLowerCase().replace( /\s+/g, '' )
+			.match( /^([+-]?\d+)(d|day|days|w|week|weeks|m|month|months|y|year|years)$/ );
+
 		if ( ! match ) {
 			return date;
 		}
-		const [, number, unit ] = match;
-		const amount = parseInt( number );
+
+		const amount      = parseInt( match[ 1 ], 10 );
+		const unit        = match[ 2 ];
 		const currentDate = new Date();
 
-		if ( unit.startsWith( 'day' ) ) {
+		if ( unit.startsWith( 'd' ) ) {
 			currentDate.setDate( currentDate.getDate() + amount );
-			return currentDate;
-		}
-		if ( unit.startsWith( 'month' ) ) {
+		} else if ( unit.startsWith( 'w' ) ) {
+			currentDate.setDate( currentDate.getDate() + ( 7 * amount ) );
+		} else if ( unit.startsWith( 'm' ) ) {
 			currentDate.setMonth( currentDate.getMonth() + amount );
-			return currentDate;
-		}
-		if ( unit.startsWith( 'year' ) ) {
+		} else if ( unit.startsWith( 'y' ) ) {
 			currentDate.setFullYear( currentDate.getFullYear() + amount );
-			return currentDate;
 		}
 
 		return currentDate;
@@ -5172,7 +5550,9 @@ function frmProFormJS() {
 				totalField[0].setAttribute( 'type', 'text' );
 			}
 
-			if ( totalField.parent().is( '.frm_with_box.frm_hidden' ) && 'string' === typeof total ) {
+			// The wrapper is frm_with_box when only one of prepend/append is set, and frm_with_boxes when both are.
+			// A number input cannot hold a comma decimal separator, so switch it back to a period before setting it.
+			if ( totalField.parent().is( '.frm_with_box.frm_hidden, .frm_with_boxes.frm_hidden' ) && 'string' === typeof total ) {
 				updatedTotal = true;
 				setFieldValueWithMask( totalField, total.replace( ',', '.' ) );
 			}
@@ -5295,7 +5675,8 @@ function frmProFormJS() {
 	}
 
 	/**
-	 * Support show=label (for field with options), show=first and show=last (for name fields)
+	 * Support show=label (for field with options) and a show= option for each part of a
+	 * multi-part field, like show=first on a name field or show=city on an address field,
 	 * in text calculations.
 	 *
 	 * @param {String} fullCalc
@@ -5312,16 +5693,39 @@ function frmProFormJS() {
 		);
 
 		Array.prototype.forEach.call(
-			[ 'first', 'middle', 'last' ],
-			( nameFieldPart ) => {
-				fullCalc = replaceNameShortcode( fullCalc, vals, field, nameFieldPart );
+			getComboSubFields(),
+			( subField ) => {
+				fullCalc = replaceSubFieldShortcode( fullCalc, vals, field, subField );
 			}
 		);
 
 		return fullCalc;
 	}
 
-	function replaceNameShortcode( fullCalc, vals, field, show ) {
+	/**
+	 * The parts of a multi-part field that a text calculation can show on their own.
+	 * Kept in step with FrmProFormsHelper::get_combo_sub_fields, which decides
+	 * which show= options survive into the formula.
+	 *
+	 * @returns {Array}
+	 */
+	function getComboSubFields() {
+		return [
+			// Name field parts.
+			'first',
+			'middle',
+			'last',
+			// Address field parts.
+			'line1',
+			'line2',
+			'city',
+			'state',
+			'zip',
+			'country'
+		];
+	}
+
+	function replaceSubFieldShortcode( fullCalc, vals, field, show ) {
 		var valueCallback = function() {
 			var match = false;
 			document.querySelectorAll( field.thisFieldCall ).forEach(
@@ -9377,7 +9781,10 @@ function frmProFormJS() {
 		});
 
 		const initialMinValue = Math.max( values[0], min );
-		const initialMaxValue = Math.min( values[1], initialMinValue + maxRange, max );
+		// An end value below the start value is not a supported range. Collapse the handles rather
+		// than letting the filled section render with a negative width. setHandlesBasedOnValue
+		// already guards this the same way.
+		const initialMaxValue = Math.max( Math.min( values[1], initialMinValue + maxRange, max ), initialMinValue );
 
 		// Measured at drag start, when the slider is guaranteed to be visible.
 		let trackWidth = 0;

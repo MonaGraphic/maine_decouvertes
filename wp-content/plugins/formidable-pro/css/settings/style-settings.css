@@ -125,6 +125,23 @@ This file is added to the visual styler admin page, accessed from the style tab.
 #frm_style_preview .frm-datepicker.flatpickr-calendar.inline.frm-datepicker-inline-small {
 	width: 300px;
 }
+/*
+ * Calendars get a 282px floor so they stay usable on a real form. The preview
+ * column can be narrower than that, and a calendar hanging outside its own field
+ * tells you less about the style than a smaller one that fits, so let an inline
+ * calendar shrink to the width the preview actually gives it.
+ */
+#frm_style_preview .frm-datepicker.flatpickr-calendar.inline:not(.frm-datepicker-inline-small) {
+	min-width: 0;
+}
+/*
+ * A range that renders inline has its end half hidden, which leaves the column
+ * beside the calendar empty. Hand that room over, so both months fit at close to
+ * the size a real form renders them, instead of sharing half a preview column.
+ */
+#frm_style_preview .frm_form_field.frm-styler-inline-range-field {
+	grid-column: span 12 / span 12;
+}
 
 .multiselect-container input[name="frm_style_setting[post_content][collapse_icon]"] + span > svg:last-child,
 .multiselect-container input[name="frm_style_setting[post_content][repeat_icon]"] + span > svg:last-child {

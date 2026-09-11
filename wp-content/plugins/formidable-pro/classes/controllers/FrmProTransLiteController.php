@@ -43,4 +43,24 @@ class FrmProTransLiteController {
 		}
 		return $options;
 	}
+
+	/**
+	 * Allow more than one Stripe or Square action on a form.
+	 *
+	 * Lite caps both gateways at a single action per form because it has no way to keep two of
+	 * them from running on the same submission. Pro adds conditional logic to form actions, so
+	 * the site owner can decide which action runs, and the cap is no longer needed.
+	 *
+	 * Hooked to the 'frm_stripe_action_options' and 'frm_square_action_options' filters.
+	 *
+	 * @since 6.35
+	 *
+	 * @param array $options Action options for the Stripe or Square action control.
+	 *
+	 * @return array
+	 */
+	public static function allow_multiple_gateway_actions( $options ) {
+		$options['limit'] = 99;
+		return $options;
+	}
 }

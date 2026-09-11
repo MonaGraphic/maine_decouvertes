@@ -297,7 +297,7 @@ class FrmProAddonsController extends FrmAddonsController {
 			</a>
 
 			<?php if ( $show_close_icon ) { ?>
-				<a style="float: right; margin-right: 30px; --primary-color: var(--dark-grey);" href="<?php echo esc_url( self::get_dismiss_renewal_message_action_url() ); ?>">
+				<a style="float: right; margin-right: 30px; --primary-color: var(--grey-700);" href="<?php echo esc_url( self::get_dismiss_renewal_message_action_url() ); ?>">
 					<?php FrmAppHelper::icon_by_class( 'frmfont frm_close_icon', array( 'aria-label' => __( 'Close', 'formidable' ) ) ); ?>
 				</a>
 			<?php } ?>
@@ -697,14 +697,15 @@ class FrmProAddonsController extends FrmAddonsController {
 						'label'  => esc_html__( 'Learn More', 'formidable' ),
 					),
 					array(
-						'url'   => FrmAppHelper::admin_upgrade_link(
+						'url'    => FrmAppHelper::admin_upgrade_link(
 							array(
 								'campaign' => 'expired-full',
 								'content'  => 'overlay-renew',
 							),
 							'account/downloads/'
 						),
-						'label' => esc_html__( 'Renew License Now', 'formidable-pro' ),
+						'target' => '_blank',
+						'label'  => esc_html__( 'Renew License Now', 'formidable-pro' ),
 					),
 				),
 			)
@@ -739,7 +740,7 @@ class FrmProAddonsController extends FrmAddonsController {
 		);
 
 		if ( isset( $error['message'] ) ) {
-			$copy = str_replace( array( 'utm_medium=nulled', '50% off', '<a ', '</a>.' ), array( 'utm_medium=nulled-full', '<b>50% off</b>', '<br/><a class="frm-meta-tag frm-green-tag frm-nulled-license-green-cta" ', '</a>' ), html_entity_decode( $error['message'] ) );
+			$copy = str_replace( array( 'utm_medium=nulled', '50% off', '<a ', '</a>.' ), array( 'utm_medium=nulled-full', '<b>50% off</b>', '<br/><a class="frm-meta-tag frm-green-tag frm-nulled-license-green-cta" target="_blank" rel="noopener" ', '</a>' ), html_entity_decode( $error['message'] ) );
 		}
 
 		$overlay_wrapper->open_overlay(

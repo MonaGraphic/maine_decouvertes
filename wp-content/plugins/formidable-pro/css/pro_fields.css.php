@@ -13,6 +13,7 @@ if ( ! empty( $vars ) ) {
 }
 	?>
 	--progress-border-color-b: <?php echo esc_html( FrmStylesHelper::adjust_brightness( $defaults['progress_border_color'], -10 ) ); ?>;
+	--date-band-fill: <?php echo esc_html( FrmStylesHelper::hex2rgba( $defaults['date_band_color'], 0.1 ) ); ?>;
 	--image-size: 150px;
 }
 
@@ -393,6 +394,19 @@ if ( ! empty( $vars ) ) {
 }
 
 /* Datepicker */
+<?php
+// Flatpickr marks the inputs it owns readonly, and Lite paints every readonly field with the
+// disabled palette. A date field is not disabled, it is still clickable, and it looked like a
+// normal field with the jQuery UI datepicker, which never set the attribute. A field that is
+// genuinely read only never reaches this rule: FrmProFieldDate::get_input_class leaves out the
+// frm_date class, so the datepicker never initializes and .flatpickr-input is never added.
+?>
+.with_frm_style input.flatpickr-input[readonly]:not([disabled]) {
+	color: var(--text-color)<?php echo esc_html( $important ); ?>;
+	background-color: var(--bg-color)<?php echo esc_html( $important ); ?>;
+	border-color: var(--border-color)<?php echo esc_html( $important ); ?>;
+}
+
 .flatpickr-calendar,
 #ui-datepicker-div {
 	background:white;
@@ -426,8 +440,26 @@ $arrow_left       = FrmProStylesController::base64_encode_image( FrmProAppHelper
 	border: 1px solid #F2F4F7;
 }
 
+<?php
+// The calendar is left to inherit the form's font rather than being pinned to a stack of our own.
+// ui-lightness/jquery-ui.css does pin one on .ui-datepicker *, but that rule is there to neutralize
+// jQuery UI's own Trebuchet MS, a library font flatpickr does not carry, so copying it would impose
+// a font on every site instead of fixing anything. flatpickr.css still pins the weekday row.
+?>
 .<?php echo esc_html( $datepicker_class ); ?>.ui-datepicker {
 	display: none;
+}
+<?php
+// The jQuery UI calendar is sized with width: 100%, and a percentage contributes nothing to the
+// shrink to fit width of the absolutely positioned wrapper above. The wrapper therefore settles on
+// its min-width while the cells lay out at their own min-content width, and the last weekday column
+// is clipped by the horizontal padding on any style whose field font size is above the size that
+// 282px was measured against. max-content lets the wrapper grow to the table it contains, with
+// min-width still holding the floor and ui-lightness's max-width: 40em still holding the ceiling.
+// Not shared with flatpickr, which sizes its own grid and does not overflow.
+?>
+.<?php echo esc_html( $datepicker_class ); ?>.ui-datepicker {
+	width: max-content;
 }
 .<?php echo esc_html( $datepicker_class ); ?>.flatpickr-calendar.inline {
 	max-width: 40em;
@@ -497,6 +529,17 @@ $arrow_left       = FrmProStylesController::base64_encode_image( FrmProAppHelper
 }
 .<?php echo esc_html( $datepicker_class ); ?> .flatpickr-months .flatpickr-prev-month svg,
 .<?php echo esc_html( $datepicker_class ); ?> .flatpickr-months .flatpickr-next-month svg {
+	display: none;
+}
+<?php
+// The arrows below are drawn as a masked pseudo element, so the icon the library ships has to come
+// out for the same reason flatpickr's svg does. jQuery UI's is a span carrying a sprite from
+// whichever theme stylesheet is loaded, and leaving it in paints that sprite alongside our arrow.
+// The rotation above turns the whole button, so the sprite also ends up mirrored and the next arrow
+// reads as pointing back.
+?>
+.<?php echo esc_html( $datepicker_class ); ?> .ui-datepicker-prev .ui-icon,
+.<?php echo esc_html( $datepicker_class ); ?> .ui-datepicker-next .ui-icon {
 	display: none;
 }
 .<?php echo esc_html( $datepicker_class ); ?> .flatpickr-months .flatpickr-prev-month:before,

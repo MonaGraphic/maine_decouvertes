@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 
 	<label for="address_type_<?php echo esc_attr( $field['id'] ); ?>">
-		<?php esc_html_e( 'Address Type', 'formidable-pro' ); ?>
+		<?php esc_html_e( 'Address Type', 'formidable' ); ?>
 	</label>
 
 	<select name="field_options[address_type_<?php echo esc_attr( $field['id'] ); ?>]" id="address_type_<?php echo esc_attr( $field['id'] ); ?>">
@@ -26,10 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php esc_html_e( 'United States', 'formidable' ); ?>
 		</option>
 		<option value="europe" <?php selected( $field['address_type'], 'europe' ); ?>>
-			<?php esc_html_e( 'Europe', 'formidable-pro' ); ?>
+			<?php esc_html_e( 'Europe', 'formidable' ); ?>
 		</option>
 		<option value="generic" <?php selected( $field['address_type'], 'generic' ); ?>>
-			<?php esc_html_e( 'Other - exclude country field', 'formidable-pro' ); ?>
+			<?php esc_html_e( 'Other - exclude country field', 'formidable' ); ?>
 		</option>
 	</select>
 </p>

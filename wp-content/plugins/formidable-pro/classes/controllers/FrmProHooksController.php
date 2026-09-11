@@ -90,6 +90,9 @@ class FrmProHooksController {
 		add_action( 'wp_before_admin_bar_render', 'FrmProAppController::admin_bar_configure', 25 );
 		add_action( 'frm_before_get_form', 'FrmProAppController::register_scripts' );
 
+		// Nested forms widen the Embeds column search, so they widen its cache invalidation too.
+		add_filter( 'frm_form_ids_affected_by_embed', 'FrmProNestedFormsController::add_nested_forms_affected_by_embed', 10, 2 );
+
 		add_filter( 'frm_db_needs_upgrade', 'FrmProDb::needs_upgrade' );
 		add_action( 'frm_before_install', 'FrmProDb::before_free_version_db_upgrade' );
 		add_action( 'frm_after_install', 'FrmProDb::upgrade' );
@@ -487,6 +490,9 @@ class FrmProHooksController {
 		// Form builder and import page
 		add_filter( 'frm_after_duplicate_form_values', 'FrmProFormsController::after_duplicate', 10, 2 );
 
+		// Switch a Lookup or Dynamic field's source form when it referenced the form that was copied.
+		add_action( 'frm_after_duplicate_form', 'FrmProDuplicateFieldsHelper::switch_source_form_id_after_duplicate', 10, 3 );
+
 		// Fix cross-form conditional logic (e.g., a repeater referencing a parent field) after all XML forms are imported.
 		add_action( 'frm_after_import_forms', 'FrmProForm::fix_cross_form_conditional_logic_after_import' );
 
@@ -530,8 +536,10 @@ class FrmProHooksController {
 		// XML Helper
 		add_action( 'frm_after_field_is_imported', 'FrmProXMLHelper::after_field_is_imported', 10, 2 );
 		add_action( 'frm_after_existing_field_is_imported', 'FrmProXMLHelper::after_field_is_imported', 10, 3 );
-		add_action( 'frm_after_import_form', 'FrmProXMLHelper::after_import_form' );
-		add_action( 'frm_after_import_forms', 'FrmProXMLHelper::reset_xml_import_fields_data' );
+		// These run before the other frm_after_import_forms callbacks so they see the switched ids.
+		add_action( 'frm_after_import_forms', 'FrmProXMLHelper::switch_field_ids_after_import', 5 );
+		add_action( 'frm_after_import_forms', 'FrmProXMLHelper::switch_form_ids_after_import', 5 );
+		add_action( 'frm_after_import_forms', 'FrmProXMLHelper::reset_xml_import_fields_data', 20 );
 		add_filter( 'frm_import_xml_field', 'FrmProXMLHelper::run_field_migrations' );
 		add_filter( 'frm_importing_xml', 'FrmProXMLHelper::after_xml_imported' );
 
@@ -542,6 +550,8 @@ class FrmProHooksController {
 		add_filter( 'frm_clean_data_field_options_before_update', 'FrmProDynamicFieldsController::clean_field_options_before_update' );
 
 		add_filter( 'frm_clean_submit_field_options_before_update', 'FrmProSubmitHelper::clean_field_options_before_update', 10, 2 );
+
+		add_filter( 'frm_clean_range_field_options_before_update', 'FrmProFieldRange::clean_field_options_before_update', 10, 2 );
 
 		// Time Controller
 		add_action( 'wp_ajax_frm_fields_ajax_time_options', 'FrmProTimeFieldsController::ajax_time_options' );
@@ -611,6 +621,10 @@ class FrmProHooksController {
 			add_action( 'frm_payment_settings_after_customer_info', 'FrmProStrpLiteController::render_paypal_shipping_billing' );
 			add_filter( 'frm_pay_action_defaults', 'FrmProStrpLiteController::add_payment_action_defaults' );
 		}
+
+		// Lite allows a single Square action per form. Pro adds conditional
+		// logic to form actions, so the one per form cap is lifted while Pro is active.
+		add_filter( 'frm_square_action_options', 'FrmProTransLiteController::allow_multiple_gateway_actions' );
 
 		add_action( 'admin_enqueue_scripts', 'FrmProFieldRte::enqueue_missing_media_gallery_scripts' );
 		add_filter( 'frm_trans_action_get_field_options_form_id', 'FrmProTransLiteController::trans_action_get_field_options_form_id' );
