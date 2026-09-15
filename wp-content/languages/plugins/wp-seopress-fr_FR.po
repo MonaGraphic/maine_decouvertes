@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - SEOPress &#8211; AI SEO Plugin &amp; On-site SEO - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-09-07 13:21:19+0000\n"
+"PO-Revision-Date: 2026-09-11 12:58:06+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,10 +19,133 @@ msgstr "Fermé toute la journée ?"
 msgid "Opening hour"
 msgstr "Horaires d‘ouverture"
 
+#: src/Services/I18nUniversalMetabox.php:580
+msgid "This comes from a role restriction set on this site. Contact your site administrator if you need access."
+msgstr "Cela provient d’une restriction de rôle définie sur ce site. Contactez l’administrateur/administratrice du site si vous avez besoin d’un accès."
+
+#: src/Services/I18nUniversalMetabox.php:579
+msgid "Open security settings"
+msgstr "Ouvrir les réglages de sécurité"
+
+#: src/Services/I18nUniversalMetabox.php:575
+msgid "Your role has been prevented from editing this section in SEO, Advanced, Security. The other sections in the menu are still available."
+msgstr "Votre rôle a été empêché de modifier cette section dans SEO, Avancé, Sécurité. Les autres sections du menu restent disponibles."
+
+#: src/Services/I18nUniversalMetabox.php:574
+msgid "This section is restricted"
+msgstr "Cette section est restreinte"
+
+#: src/Services/I18nUniversalMetabox.php:570
+msgid "It comes from the role restrictions in SEO, Advanced, Security: \"SEO metaboxes\" and \"Content Analysis\". Unticking your role there brings this panel back."
+msgstr "Cela provient des restrictions de rôle dans SEO, Avancé, Sécurité : « Boîtes méta SEO » et « Analyse de contenu ». Y décocher votre rôle fait réapparaître ce panneau."
+
+#: src/Services/I18nUniversalMetabox.php:566
+msgid "Your user role has been prevented from editing SEO data, so there is nothing to show here. This is a setting, not an error."
+msgstr "Votre rôle utilisateur a été empêché de modifier les données SEO, il n’y a donc rien à afficher ici. Il s’agit d’un réglage, pas d’une erreur."
+
+#: src/Services/I18nUniversalMetabox.php:565
+msgid "This metabox is restricted"
+msgstr "Cette boîte méta est restreinte"
+
+#. translators: 1: weekday, e.g. Monday. 2: time slot, e.g. Morning. 3: field,
+#. e.g. Opening hour.
+#: src/Services/I18nUniversalMetabox.php:70
+msgid "%1$s, %2$s: %3$s"
+msgstr "%1$s, %2$s : %3$s"
+
+#: src/Services/I18nUniversalMetabox.php:68
+msgid "Closing minutes"
+msgstr "Minutes de fermeture"
+
+#: src/Services/I18nUniversalMetabox.php:67
+msgid "Closing hour"
+msgstr "Heure de fermeture"
+
+#: src/Services/I18nUniversalMetabox.php:66
+msgid "Opening minutes"
+msgstr "Minutes d’ouverture"
+
+#: src/Services/I18nUniversalMetabox.php:64
+msgid "Afternoon"
+msgstr "Après-midi"
+
+#: src/Services/I18nUniversalMetabox.php:63
+msgid "Morning"
+msgstr "Matin"
+
+#: src/Data/CommandPaletteIndex.php:325
+#: public/admin/settings/415.c4bdf048ba1312c53976.js:1
+msgid "Expose abilities to AI agents and external tools"
+msgstr "Exposer les capacités aux agents IA et aux outils externes"
+
+#: inc/admin/ajax/ContentAnalysis.php:66
+#: src/Actions/Api/ContentAnalysis.php:282 src/Actions/Api/PagePreview.php:145
+msgid "This URL redirects outside your site. Turn off the redirect to get the Google preview and content analysis."
+msgstr "Cette URL redirige en dehors de votre site. Désactivez la redirection pour obtenir l’aperçu Google et l’analyse de contenu."
+
 #: src/Services/Settings/ExportSettings.php:128
 #: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
 msgid "License key"
 msgstr "Clé de licence"
+
+#: src/Services/Settings/ExportSettings.php:135
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "API keys & secrets"
+msgstr "Clés API & secrets"
+
+#: src/Services/Settings/ExportSettings.php:117
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "Search engine verification codes"
+msgstr "Codes de vérification des moteurs de recherche"
+
+#: src/Services/Settings/ExportSettings.php:104
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "Analytics & tracking IDs"
+msgstr "Statistiques & identifiants de suivi"
+
+#: src/Services/Settings/ExportSettings.php:71
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "Social profiles"
+msgstr "Profils sociaux"
+
+#: src/Services/Settings/ExportSettings.php:63
+#: public/admin/settings/298.3eda7d3bf24d3ccff4cc.js:1
+msgid "Knowledge Graph & Organization schema"
+msgstr "Knowledge Graph & schéma Organisation"
+
+#. translators: %s the resolved meta description
+#: src/Services/I18nUniversalMetabox.php:181
+msgid "No custom meta description is set on this post, but one is generated from your global settings (e.g. a custom field): %s"
+msgstr "Aucune méta description personnalisée n’est définie sur cette publication, mais une méta description est générée à partir de vos réglages globaux (par exemple un champ personnalisé) : %s"
+
+#. translators: %s the resolved meta title
+#: src/Services/I18nUniversalMetabox.php:153
+msgid "No custom title is set on this post, but one is generated from your global title settings (e.g. a custom field): %s"
+msgstr "Aucun titre personnalisé n’est défini sur cette publication, mais un titre est généré à partir de vos réglages globaux de titre (par exemple un champ personnalisé) : %s"
+
+#: src/Services/ContentAnalysis/GetContent.php:1767
+msgid "This content is built with a page builder that stores its layout outside the post content, so these checks could not read it and were skipped. Please verify these aspects directly on the published page."
+msgstr "Ce contenu est créé avec un constructeur de page qui stocke sa mise en page en dehors du contenu de la publication ; ces vérifications n’ont donc pas pu y accéder et ont été ignorées. Veuillez vérifier ces aspects directement sur la page publiée."
+
+#: src/Actions/Api/Options/AnalyticsSettings.php:143
+msgid "Your custom tracking scripts could not be saved: this installation does not allow unfiltered HTML (the \"unfiltered_html\" capability is disabled, typically by DISALLOW_UNFILTERED_HTML on multisite). Every other setting on this page was saved."
+msgstr "Vos scripts de suivi personnalisés n’ont pas pu être enregistrés : cette installation n’autorise pas le HTML non filtré (la permission « unfiltered_html » est désactivée, généralement par DISALLOW_UNFILTERED_HTML sur un multisite). Tous les autres réglages de cette page ont été enregistrés."
+
+#: src/Actions/Admin/ModuleDashboard.php:313
+msgid "Not configured"
+msgstr "Non configuré"
+
+#: src/Actions/Admin/ModuleDashboard.php:311
+msgid "Renew"
+msgstr "Renouveler"
+
+#: src/Actions/Admin/ModuleDashboard.php:309
+msgid "Get AI credits"
+msgstr "Obtenir des crédits IA"
+
+#: src/Actions/Admin/ModuleDashboard.php:306
+msgid "SEOPress AI Credits"
+msgstr "SEOPress AI Credits"
 
 #: public/editor/blocks/preferred-source/block.json
 msgctxt "block keyword"
@@ -137,7 +260,7 @@ msgstr "Les permaliens simples sont activés. L’URL jolie du plan de site ne s
 #. "videos, authors").
 #: src/Services/Sitemap/Diagnostic.php:908
 msgid "These optional content types are turned off: %s. This is fine if intended; if you expected them in your sitemap, enable them in the XML / HTML Sitemap settings above."
-msgstr "Ces types de contenu facultatifs sont désactivés : %s. C’est correct si c’est intentionnel ; si vous les attendiez dans votre plan de site, activez-les dans les réglages Plan de site XML / HTML ci-dessus."
+msgstr "Ces types de contenu facultatifs sont désactivés : %s. C’est correct si c’est intentionnel ; si vous les attendiez dans votre plan de site, activez-les dans les réglages Plan de site XML/HTML ci-dessus."
 
 #: src/Services/Sitemap/Diagnostic.php:371
 msgid "Content type"
@@ -321,10 +444,6 @@ msgstr "Récupérer les directives robots/indexation d’une publication (noinde
 msgid "Retrieve the social (Facebook/Open Graph and X/Twitter) title, description and image metadata of a post."
 msgstr "Récupérer les métadonnées sociales (Facebook/Open Graph et X/Twitter) de titre, description et image d’une publication."
 
-#: src/Actions/Abilities/AbilitiesApi.php:298
-msgid "Update the social (Facebook/Open Graph and X/Twitter) metadata of a post. Only known SEOPress social meta keys are accepted."
-msgstr "Mettre à jour les métadonnées sociales (Facebook/Open Graph et X/Twitter) d’une publication. Seules les clés meta sociales SEOPress connues sont acceptées."
-
 #: src/Actions/Abilities/AbilitiesApi.php:342
 msgid "Analyze post content"
 msgstr "Analyser le contenu de la publication"
@@ -389,10 +508,6 @@ msgstr "Liste des réglages robots sous forme d’entrées { clé, valeur }."
 msgid "Update post robots settings"
 msgstr "Mettre à jour les réglages robots de la publication"
 
-#: src/Actions/Abilities/AbilitiesApi.php:234
-msgid "Map of SEOPress robots meta keys to values, e.g. { \"_seopress_robots_index\": \"yes\", \"_seopress_robots_canonical\": \"https://example.com/\" }."
-msgstr "Tableau associatif des clés meta robots SEOPress aux valeurs, par exemple { \"_seopress_robots_index\": \"yes\", \"_seopress_robots_canonical\": \"https://example.com/\" }."
-
 #: src/Actions/Abilities/AbilitiesApi.php:267
 msgid "Get post social settings"
 msgstr "Obtenir les réglages sociaux de la publication"
@@ -404,10 +519,6 @@ msgstr "Liste des réglages sociaux sous forme d’entrées { clé, valeur }."
 #: src/Actions/Abilities/AbilitiesApi.php:297
 msgid "Update post social settings"
 msgstr "Mettre à jour les réglages sociaux de la publication"
-
-#: src/Actions/Abilities/AbilitiesApi.php:309
-msgid "Map of SEOPress social meta keys to values, e.g. { \"_seopress_social_fb_title\": \"...\", \"_seopress_social_fb_desc\": \"...\" }."
-msgstr "Tableau associatif des clés meta sociales SEOPress aux valeurs, par exemple { \"_seopress_social_fb_title\": \"...\", \"_seopress_social_fb_desc\": \"...\" }."
 
 #: src/Actions/Abilities/AbilitiesApi.php:343
 msgid "Run the SEOPress content analysis on a published post and return the SEO score, checks and recommendations."
@@ -473,14 +584,26 @@ msgstr "Plan de site accessible"
 msgid "The sitemap responded with HTTP 200 in %d ms."
 msgstr "Le plan de site a répondu avec HTTP 200 en %d ms."
 
-#: src/Actions/Abilities/AbilitiesApi.php:223
-msgid "Update the robots/indexing directives of a post. Only known SEOPress robots meta keys are accepted; unknown keys are ignored."
-msgstr "Mettre à jour les directives robots/indexation d’une publication. Seules les clés meta robots SEOPress connues sont acceptées ; les clés inconnues sont ignorées."
-
 #. translators: %s: error message returned by the HTTP request.
 #: src/Services/Sitemap/Diagnostic.php:292
 msgid "The sitemap could not be reached: %s"
 msgstr "Le plan de site n’a pas pu être atteint : %s"
+
+#: src/Actions/Abilities/AbilitiesApi.php:298
+msgid "Update the social (Facebook/Open Graph and X/Twitter) metadata of a post. Only known SEOPress social meta keys are accepted."
+msgstr "Mettre à jour les métadonnées sociales (Facebook/Open Graph et X/Twitter) d’une publication. Seules les clés méta sociales SEOPress connues sont acceptées."
+
+#: src/Actions/Abilities/AbilitiesApi.php:309
+msgid "Map of SEOPress social meta keys to values, e.g. { \"_seopress_social_fb_title\": \"...\", \"_seopress_social_fb_desc\": \"...\" }."
+msgstr "Tableau associatif des clés méta sociales SEOPress aux valeurs, par exemple { \"_seopress_social_fb_title\": \"...\", \"_seopress_social_fb_desc\": \"...\" }."
+
+#: src/Actions/Abilities/AbilitiesApi.php:234
+msgid "Map of SEOPress robots meta keys to values, e.g. { \"_seopress_robots_index\": \"yes\", \"_seopress_robots_canonical\": \"https://example.com/\" }."
+msgstr "Tableau associatif des clés méta robots SEOPress aux valeurs, par exemple { \"_seopress_robots_index\": \"yes\", \"_seopress_robots_canonical\": \"https://example.com/\" }."
+
+#: src/Actions/Abilities/AbilitiesApi.php:223
+msgid "Update the robots/indexing directives of a post. Only known SEOPress robots meta keys are accepted; unknown keys are ignored."
+msgstr "Mettre à jour les directives robots/indexation d’une publication. Seules les clés méta robots SEOPress connues sont acceptées ; les clés inconnues sont ignorées."
 
 #: inc/admin/page-builders/gutenberg/blocks/preferred-source/block.php:65
 #: public/editor/blocks/preferred-source/index.js:1
@@ -664,18 +787,9 @@ msgstr "Données & suivi"
 msgid "Google's AI features and search rank in-depth content with a unique point of view higher than thin, commodity content. Make sure your content covers the topic thoroughly."
 msgstr "Les fonctionnalités d’IA de Google et le classement dans la recherche favorisent les contenus approfondis avec un point de vue unique par rapport aux contenus maigres et génériques. Assurez-vous que votre contenu couvre le sujet en profondeur."
 
-#. translators: %d word count
-#: src/Services/ContentAnalysis/GetContent.php:1805
-msgid "Your content has %d words. Good job!"
-msgstr "Votre contenu contient %d mots. Bravo !"
-
 #: src/Services/ContentAnalysis/GetContent.php:1838
 msgid "Organize your content into clear sections with a coherent heading hierarchy. This helps both readers and AI systems understand the structure of your page."
 msgstr "Organisez votre contenu en sections claires avec une hiérarchie de titres cohérente. Cela aide à la fois les lecteurs et les systèmes d’IA à comprendre la structure de votre page."
-
-#: src/Services/ContentAnalysis/GetContent.php:1890
-msgid "Your heading structure looks coherent. Good job!"
-msgstr "La structure de vos titres semble cohérente. Bravo !"
 
 #: src/Services/ContentAnalysis/GetContent.php:1925
 msgid "Google recommends including relevant, high-quality images and videos in your content. Rich media improves engagement and eligibility for AI experiences."
@@ -717,6 +831,15 @@ msgstr "Votre contenu est long (%d mots) mais ne contient aucune image ni vidéo
 #: src/Services/I18nUniversalMetabox.php:828
 msgid "Start typing a keyword: Google's autocomplete suggestions appear in the dropdown. Pick one to add it to your target keywords."
 msgstr "Commencez à taper un mot-clé : les suggestions de saisie semi-automatique de Google apparaissent dans la liste déroulante. Choisissez-en une pour l’ajouter à vos mots-clés cibles."
+
+#: src/Services/ContentAnalysis/GetContent.php:1890
+msgid "Your heading structure looks coherent. Good job!"
+msgstr "La structure de vos titres semble cohérente. Bravo !"
+
+#. translators: %d word count
+#: src/Services/ContentAnalysis/GetContent.php:1805
+msgid "Your content has %d words. Good job!"
+msgstr "Votre contenu contient %d mots. Bravo !"
 
 #: src/Services/I18nUniversalMetabox.php:822
 msgid "Saving…"
@@ -871,10 +994,6 @@ msgstr "Type d’action d’indexation Google"
 msgid "Manual URL batch submission"
 msgstr "Soumission manuelle par lot d’URL"
 
-#: src/Data/CommandPaletteIndex.php:254
-msgid "Bing / IndexNow API key"
-msgstr "Clé API Bing / IndexNow"
-
 #: src/Data/CommandPaletteIndex.php:272 src/Data/CommandPaletteIndex.php:273
 #: src/Data/CommandPaletteIndex.php:274 src/Data/CommandPaletteIndex.php:275
 #: src/Data/CommandPaletteIndex.php:276 src/Data/CommandPaletteIndex.php:277
@@ -1026,10 +1145,6 @@ msgstr "Afficher la colonne des mots-clés cibles"
 msgid "Freeze modified date option"
 msgstr "Geler l’option de date modifiée"
 
-#: src/Data/CommandPaletteIndex.php:304
-msgid "Remove WP generator meta tag"
-msgstr "Retirer la balise meta générateur de WP"
-
 #: src/Data/CommandPaletteIndex.php:305
 msgid "Remove shortlink tag"
 msgstr "Retirer la balise shortlink"
@@ -1071,6 +1186,14 @@ msgstr "Vous avez %s schéma automatique :"
 #: src/Data/CommandPaletteIndex.php:308
 msgid "Remove X-Pingback header"
 msgstr "Retirer l’entête X-Pingback"
+
+#: src/Data/CommandPaletteIndex.php:304
+msgid "Remove WP generator meta tag"
+msgstr "Retirer la balise méta générateur de WP"
+
+#: src/Data/CommandPaletteIndex.php:254
+msgid "Bing / IndexNow API key"
+msgstr "Clé API Bing / IndexNow"
 
 #: src/Data/CommandPaletteIndex.php:222
 msgid "Matomo URL"
@@ -1124,10 +1247,6 @@ msgstr "Nofollow global"
 msgid "Noindex paginated pages"
 msgstr "Noindex des pages paginées"
 
-#: src/Data/CommandPaletteIndex.php:104
-msgid "rel prev / rel next on pagination"
-msgstr "rel prev / rel next sur la pagination"
-
 #: src/Data/CommandPaletteIndex.php:106
 msgid "Noindex attachments"
 msgstr "Noindex des pièces jointes"
@@ -1145,10 +1264,6 @@ msgstr "Social › Knowledge Graph"
 #: src/Data/CommandPaletteIndex.php:148
 msgid "Knowledge Graph name"
 msgstr "Nom du Knowledge Graph"
-
-#: src/Data/CommandPaletteIndex.php:149
-msgid "Knowledge Graph image / logo"
-msgstr "Image / logo du Knowledge Graph"
 
 #: src/Data/CommandPaletteIndex.php:150
 msgid "Knowledge Graph phone number"
@@ -1189,19 +1304,10 @@ msgstr "Pays du Knowledge Graph"
 msgid "Social › Your accounts"
 msgstr "Social › Vos comptes"
 
-#: src/Data/CommandPaletteIndex.php:164
-msgid "X / Twitter URL"
-msgstr "URL X / Twitter"
-
 #: src/Data/CommandPaletteIndex.php:172 src/Data/CommandPaletteIndex.php:173
 #: src/Data/CommandPaletteIndex.php:174 src/Data/CommandPaletteIndex.php:175
 msgid "Social › Facebook"
 msgstr "Social › Facebook"
-
-#: src/Data/CommandPaletteIndex.php:178 src/Data/CommandPaletteIndex.php:179
-#: src/Data/CommandPaletteIndex.php:180 src/Data/CommandPaletteIndex.php:181
-msgid "Social › X / Twitter"
-msgstr "Social › X / Twitter"
 
 #: src/Data/CommandPaletteIndex.php:184
 msgid "LinkedIn image size"
@@ -1290,10 +1396,6 @@ msgstr "Afficher la date dans le plan de site HTML"
 msgid "Knowledge Graph email"
 msgstr "E-mail du Knowledge Graph"
 
-#: src/Data/CommandPaletteIndex.php:152
-msgid "Knowledge Graph tax / VAT ID"
-msgstr "ID fiscal / TVA du Knowledge Graph"
-
 #: src/Data/CommandPaletteIndex.php:156
 msgid "Knowledge Graph street address"
 msgstr "Adresse postale du Knowledge Graph"
@@ -1339,6 +1441,27 @@ msgstr "Statistiques › Événements"
 #: src/Data/CommandPaletteIndex.php:224 src/Data/CommandPaletteIndex.php:225
 msgid "Analytics › Matomo"
 msgstr "Statistiques › Matomo"
+
+#: src/Data/CommandPaletteIndex.php:178 src/Data/CommandPaletteIndex.php:179
+#: src/Data/CommandPaletteIndex.php:180 src/Data/CommandPaletteIndex.php:181
+msgid "Social › X / Twitter"
+msgstr "Social › X / Twitter"
+
+#: src/Data/CommandPaletteIndex.php:164
+msgid "X / Twitter URL"
+msgstr "URL X / Twitter"
+
+#: src/Data/CommandPaletteIndex.php:152
+msgid "Knowledge Graph tax / VAT ID"
+msgstr "ID fiscal / TVA du Knowledge Graph"
+
+#: src/Data/CommandPaletteIndex.php:149
+msgid "Knowledge Graph image / logo"
+msgstr "Image/logo du Knowledge Graph"
+
+#: src/Data/CommandPaletteIndex.php:104
+msgid "rel prev / rel next on pagination"
+msgstr "rel prev/rel next sur la pagination"
 
 #: src/Data/CommandPaletteIndex.php:99
 msgid "Global noindex"
@@ -3255,10 +3378,6 @@ msgstr "Voici à quoi ressemblera votre page dans les résultats de recherche Go
 msgid "The URL has been indexed, can appear in Google Search results, and no problems were found with any enhancements found in the page (structured data, linked AMP pages, and so on)."
 msgstr "L’URL a été indexée, peut apparaître dans les résultats de recherche Google, et aucun problème n’a été détecté avec les améliorations présentes sur la page (données structurées, pages AMP liées, etc.)."
 
-#: src/Services/I18nUniversalMetabox.php:655
-msgid "The URL has been indexed and can appear in Google Search results, but there are some problems that might prevent it from appearing with the enhancements that you applied to the page. This might mean a problem with an associated AMP page, or malformed structured data for a rich result (such as a recipe or job posting) on the page."
-msgstr "L’URL a été indexée et peut apparaître dans les résultats de recherche Google, mais certains problèmes peuvent l’empêcher d’apparaître avec les améliorations que vous avez appliquées à la page. Cela peut indiquer un problème avec une page AMP associée, ou des données structurées mal formées pour un résultat enrichi (comme une recette ou une offre d’emploi) sur la page."
-
 #: src/Services/I18nUniversalMetabox.php:661
 msgid "URL is not on Google: Indexing errors"
 msgstr "L’URL n’est pas sur Google : erreurs d’indexation"
@@ -3266,6 +3385,10 @@ msgstr "L’URL n’est pas sur Google : erreurs d’indexation"
 #: src/Services/I18nUniversalMetabox.php:665
 msgid "There was at least one critical error that prevented the URL from being indexed, and it cannot appear in Google Search until those issues are fixed."
 msgstr "Il y a eu au moins une erreur critique qui a empêché l’URL d’être indexée, et elle ne peut pas apparaître dans la recherche Google tant que ces problèmes ne sont pas corrigés."
+
+#: src/Services/I18nUniversalMetabox.php:655
+msgid "The URL has been indexed and can appear in Google Search results, but there are some problems that might prevent it from appearing with the enhancements that you applied to the page. This might mean a problem with an associated AMP page, or malformed structured data for a rich result (such as a recipe or job posting) on the page."
+msgstr "L’URL a été indexée et peut apparaître dans les résultats de recherche Google, mais certains problèmes peuvent l’empêcher d’apparaître avec les améliorations que vous avez appliquées à la page. Cela peut indiquer un problème avec une page AMP associée, ou des données structurées mal formées pour un résultat enrichi (comme une recette ou une offre d’emploi) sur la page."
 
 #. translators: %s impact of this analysis, eg: high
 #. translators: %s degree of severity, eg: low
@@ -4531,15 +4654,15 @@ msgstr "/ 568 pixels -"
 msgid " / 940 pixels - "
 msgstr "/ 940 pixels -"
 
+#: inc/admin/metaboxes/admin-metaboxes-form.php:329
+msgid "A canonical URL is the URL of the page that Google thinks is most representative from a set of duplicate pages on your site. <br>For example, if you have URLs for the same page (for example: example.com?dress=1234 and example.com/dresses/1234), Google chooses one as canonical. <br>Note that the pages do not need to be absolutely identical; minor changes in sorting or filtering of list pages do not make the page unique (for example, sorting by price or filtering by item color). The canonical can be in a different domain than a duplicate."
+msgstr "Une URL canonique est l’URL de la page que Google considère comme la plus représentative d’un ensemble de pages dupliquées sur votre site. <br>Par exemple, si vous avez des URLs pour la même page (par exemple : example.com?dress=1234 et example.com/dresses/1234), Google en choisit une comme canonique. <br>Notez que les pages n’ont pas besoin d’être absolument identiques ; des modifications mineures dans le tri ou le filtrage des pages de liste ne rendent pas la page unique (par exemple, trier par prix ou filtrer par couleur d’article). L’URL canonique peut être sur un domaine différent de celui dupliqué."
+
 #: inc/admin/metaboxes/admin-metaboxes-form.php:452
 #: src/Helpers/Metas/SocialSettings.php:47
 #: public/admin/settings/876.bd1694f30b982522c8f5.js:1
 msgid "Minimum size: 200x200px, ideal ratio 1.91:1, 8Mb max. (e.g. 1640x856px or 3280x1712px for retina screens)"
 msgstr "Taille minimale : 200x200px, ratio idéal 1,91:1, 8 Mo max. (ex. 1640x856px ou 3280x1712px pour écrans retina)"
-
-#: inc/admin/metaboxes/admin-metaboxes-form.php:329
-msgid "A canonical URL is the URL of the page that Google thinks is most representative from a set of duplicate pages on your site. <br>For example, if you have URLs for the same page (for example: example.com?dress=1234 and example.com/dresses/1234), Google chooses one as canonical. <br>Note that the pages do not need to be absolutely identical; minor changes in sorting or filtering of list pages do not make the page unique (for example, sorting by price or filtering by item color). The canonical can be in a different domain than a duplicate."
-msgstr "Une URL canonique est l’URL de la page que Google considère comme la plus représentative d’un ensemble de pages dupliquées sur votre site. <br>Par exemple, si vous avez des URLs pour la même page (par exemple : example.com?dress=1234 et example.com/dresses/1234), Google en choisit une comme canonique. <br>Notez que les pages n’ont pas besoin d’être absolument identiques ; des modifications mineures dans le tri ou le filtrage des pages de liste ne rendent pas la page unique (par exemple, trier par prix ou filtrer par couleur d’article). L’URL canonique peut être sur un domaine différent de celui dupliqué."
 
 #: inc/admin/metaboxes/admin-metaboxes-form.php:741
 #: src/Helpers/Metas/RedirectionSettings.php:100

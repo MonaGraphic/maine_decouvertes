@@ -1,10 +1,10 @@
 {
   "key": "group_page_builder",
-  "title": "Page Builder",
+  "title": "Éditeur riche",
   "fields": [
     {
       "key": "field_page_builder",
-      "label": "Page Builder",
+      "label": "Éléments de la page",
       "name": "page_builder",
       "aria-label": "",
       "type": "flexible_content",
@@ -202,6 +202,32 @@
             }
           ]
         },
+        "layout_video": {
+          "key": "layout_video",
+          "name": "video",
+          "label": "Vidéo",
+          "display": "block",
+          "sub_fields": [
+            {
+              "key": "field_pb_video",
+              "label": "Vidéo",
+              "name": "video",
+              "aria-label": "",
+              "type": "oembed",
+              "instructions": "Collez l’URL d’une vidéo YouTube ou Vimeo.",
+              "required": 1,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "width": "",
+              "height": "",
+              "allow_in_bindings": 0
+            }
+          ]
+        },
         "layout_bouton": {
           "key": "layout_bouton",
           "name": "bouton",
@@ -223,6 +249,27 @@
                 "id": ""
               },
               "return_format": "array",
+              "allow_in_bindings": 0
+            },
+            {
+              "key": "field_pb_texte_lien",
+              "label": "Texte du lien",
+              "name": "texte_lien",
+              "aria-label": "",
+              "type": "text",
+              "instructions": "Le texte est synchronisé avec le titre du lien.",
+              "required": 1,
+              "conditional_logic": 0,
+              "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+              },
+              "default_value": "",
+              "maxlength": "",
+              "placeholder": "",
+              "prepend": "",
+              "append": "",
               "allow_in_bindings": 0
             }
           ]

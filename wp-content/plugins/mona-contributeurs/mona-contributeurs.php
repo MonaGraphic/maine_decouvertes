@@ -67,22 +67,22 @@ add_action(
 );
 
 /**
- * Enregistre la taxonomie des activités.
+ * Enregistre la taxonomie des thématiques.
  */
 function mona_contributeurs_register_taxonomy(): void
 {
     $labels = [
-        'name'              => __('Activités', 'mona-contributeurs'),
-        'singular_name'     => __('Activité', 'mona-contributeurs'),
-        'search_items'      => __('Rechercher une activité', 'mona-contributeurs'),
-        'all_items'         => __('Toutes les activités', 'mona-contributeurs'),
-        'edit_item'         => __('Modifier l’activité', 'mona-contributeurs'),
-        'add_new_item'      => __('Ajouter une activité', 'mona-contributeurs'),
-        'menu_name'         => __('Activités', 'mona-contributeurs'),
+        'name'              => __('Thématiques', 'mona-contributeurs'),
+        'singular_name'     => __('Thématique', 'mona-contributeurs'),
+        'search_items'      => __('Rechercher une thématique', 'mona-contributeurs'),
+        'all_items'         => __('Toutes les thématiques', 'mona-contributeurs'),
+        'edit_item'         => __('Modifier l’thématique', 'mona-contributeurs'),
+        'add_new_item'      => __('Ajouter une thématique', 'mona-contributeurs'),
+        'menu_name'         => __('Thématiques', 'mona-contributeurs'),
     ];
 
     register_taxonomy(
-        'activite_contributeur',
+        'thematiques_contributeur',
         ['contributeur'],
         [
             'labels'            => $labels,
@@ -91,7 +91,7 @@ function mona_contributeurs_register_taxonomy(): void
             'show_in_rest'      => true,
             'hierarchical'      => true,
             'rewrite'           => [
-                'slug' => 'activites',
+                'slug' => 'thematiques',
             ],
         ]
     );

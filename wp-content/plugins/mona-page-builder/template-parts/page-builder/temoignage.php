@@ -57,7 +57,7 @@ $photo_id = is_numeric( $photo ) ? absint( $photo ) : 0;
 	<div class="page-builder__testimonial-content">
 		<?php if ( $contenu ) : ?>
 			<blockquote>
-				<?php echo wp_kses_post( wpautop( $contenu ) ); ?>
+				<?php echo esc_html( '" ' . $contenu . ' "' ); ?>
 			</blockquote>
 		<?php endif; ?>
 

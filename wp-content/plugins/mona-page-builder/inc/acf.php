@@ -87,3 +87,36 @@ function mona_page_builder_testimonials_active(): bool {
 	 */
 	return defined( 'MONA_TESTIMONIALS_VERSION' );
 }
+
+/**
+ * Personnalise les libellés de l'interface du Page Builder.
+ */
+/**
+ * Personnalise les libellés ACF du Page Builder.
+ */
+add_filter(
+	'gettext_acf',
+	static function ( string $translated, string $text, string $domain ): string {
+		return match ( $text ) {
+			'Rename'       => 'Renommer le bloc',
+			'Enable'       => 'Afficher sur le site',
+			'Disable'      => 'Masquer sur le site',
+			'Disabled'     => 'Masqué sur le site',
+			'Expand All'   => 'Tout ouvrir',
+			'Collapse All' => 'Tout fermer',
+
+			'More layout actions...' => 'Voir plus',
+
+			'Delete %s' => 'Suppression du bloc',
+
+			'Are you sure you want to delete %s?' => 'Êtes-vous sûr(e) de vouloir supprimer ce bloc ?',
+
+			'Delete' => 'Supprimer',
+			'Cancel' => 'Annuler',
+
+			default => $translated,
+		};
+	},
+	20,
+	3
+);

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - Formidable Forms &#8211; WordPress Form Builder for Contact Forms, Calculators, Quizzes &amp; More - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-09-09 12:56:49+0000\n"
+"PO-Revision-Date: 2026-09-13 19:17:16+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1007,10 +1007,6 @@ msgstr "Se désabonner : %s"
 msgid "Need help? Get in touch with our team"
 msgstr "Besoin d’aide ? Contactez notre équipe"
 
-#: classes/views/summary-emails/base.php:54
-msgid "Contact support"
-msgstr "Contacter l’assistance"
-
 #: classes/views/summary-emails/base.php:61
 msgid "Unsubscribe"
 msgstr "Se désabonner"
@@ -1063,6 +1059,10 @@ msgstr "Extensions obsolètes"
 #: classes/views/frm-settings/email/settings.php:17
 msgid "Upgrade to PRO"
 msgstr "Passer à la version Pro"
+
+#: classes/views/summary-emails/base.php:54
+msgid "Contact support"
+msgstr "Contacter le support"
 
 #. translators: %1$s: HTML open tag, %2$s: HTML end tag.
 #: classes/helpers/FrmAppHelper.php:4010
@@ -3264,12 +3264,6 @@ msgstr "Un champ vide"
 msgid "IF"
 msgstr "SI"
 
-#. translators: %s: Plan name
-#: classes/views/shared/upgrade_overlay.php:55
-#: classes/views/shared/upgrade_overlay.php:67
-msgid "Upgrade to %s"
-msgstr "Passez à %s"
-
 #: classes/models/FrmFormAction.php:995
 msgid "Draft is saved"
 msgstr "Brouillon enregistré."
@@ -3456,6 +3450,12 @@ msgstr "Modifications de l’entrée"
 #: classes/helpers/FrmFormsHelper.php:189 classes/views/xml/import_form.php:132
 msgid "Search Forms"
 msgstr "Rechercher des formulaires"
+
+#. translators: %s: Plan name
+#: classes/views/shared/upgrade_overlay.php:55
+#: classes/views/shared/upgrade_overlay.php:67
+msgid "Upgrade to %s"
+msgstr "Mettre à niveau vers %s"
 
 #: classes/views/frm-settings/misc.php:9
 msgid "Allow Formidable Forms to track plugin usage to help us ensure compatibility and simplify our settings."
@@ -3961,14 +3961,14 @@ msgstr "Passer à la version Pro"
 msgid "Remove Box Shadow"
 msgstr "Retirer l’ombre de la boîte"
 
-#: classes/views/shared/review.php:17
-msgid "Congratulations!"
-msgstr "Félicitations&nbsp;!"
-
 #: classes/views/form-templates/modals/leave-email-modal.php:62
 #: classes/views/inbox/list.php:38
 msgid "Subscribe"
 msgstr "S'abonner"
+
+#: classes/views/shared/review.php:17
+msgid "Congratulations!"
+msgstr "Félicitations !"
 
 #: classes/controllers/FrmDeactivationFeedbackController.php:115
 #: classes/controllers/FrmDeactivationFeedbackController.php:116
@@ -4139,7 +4139,7 @@ msgstr "Code court"
 
 #: classes/views/frm-fields/back-end/html-content.php:16
 msgid "Content"
-msgstr "Exercices"
+msgstr "Contenu"
 
 #: classes/models/FrmGatedContentAction.php:65 js/admin/applications.js:361
 msgid "Page"
@@ -4574,14 +4574,6 @@ msgstr "Couleur du fond"
 #: classes/views/styles/_buttons.php:166
 msgid "Shadow"
 msgstr "Ombre"
-
-#: classes/views/styles/_buttons.php:203
-#: classes/views/styles/_field-description.php:102
-#: classes/views/styles/_field-sizes.php:97
-#: classes/views/styles/_form-description.php:40
-#: classes/views/styles/_form-title.php:45
-msgid "Margin"
-msgstr "Marge"
 
 #: classes/views/styles/_form-messages.php:12
 msgid "Success"
@@ -5105,6 +5097,14 @@ msgstr "Réglages du formulaire"
 #: classes/views/styles/_sample_form.php:18
 msgid "Text field"
 msgstr "Champ de texte"
+
+#: classes/views/styles/_buttons.php:203
+#: classes/views/styles/_field-description.php:102
+#: classes/views/styles/_field-sizes.php:97
+#: classes/views/styles/_form-description.php:40
+#: classes/views/styles/_form-title.php:45
+msgid "Margin"
+msgstr "Marge externe"
 
 #: classes/models/FrmField.php:231
 msgid "Page Break"
@@ -6194,10 +6194,6 @@ msgstr "Voir les rapports"
 #: classes/models/fields/FrmFieldType.php:886
 msgid "Untitled"
 msgstr "Sans titre"
-
-#: classes/models/fields/FrmFieldUrl.php:48
-msgid "Website"
-msgstr "Site Web"
 
 #: classes/helpers/FrmEntriesListHelper.php:516
 #: classes/views/frm-entries/sidebar-shared.php:54
@@ -7367,6 +7363,10 @@ msgstr "Le fichier n’existe pas, veuillez réessayer."
 #: classes/controllers/FrmSettingsController.php:521
 msgid "Settings Saved"
 msgstr "Réglages enregistrés"
+
+#: classes/models/fields/FrmFieldUrl.php:48
+msgid "Website"
+msgstr "Site"
 
 #: classes/controllers/FrmFormsController.php:29
 #: classes/controllers/FrmFormsController.php:1307

@@ -92,6 +92,22 @@ function mona_contributeurs_register_fields(): void
                 'name' => 'linkedin',
                 'type' => 'url',
             ],
+
+            [
+                'key' => 'field_contributor_magazines',
+                'label' => 'Magazines',
+                'name' => 'contributor_magazines',
+                'type' => 'relationship',
+                'instructions' => 'Sélectionnez les magazines auxquels ce contributeur a participé.',
+                'post_type' => [ 'product' ],
+                'post_status' => [ 'publish' ],
+                'filters' => [ 'search' ],
+                'return_format' => 'object',
+                'min' => 0,
+                'max' => 0,
+                'bidirectional' => 1,
+                'bidirectional_target' => [ 'field_magazine_contributors' ],
+            ],
         ],
 
         'location' => [
